@@ -1,17 +1,22 @@
 # Mango 🥭
 
-An Object-to-Graph Mapping tool to build Knowledge Graphs with Node.js and Neo4j.
+An Object-to-Graph Mapping tool to build Knowledge Graphs with [Node.js](https://nodejs.org/) and [Neo4j](https://neo4j.com/).
 
 The idea behind the project is build a tool to facilitate creation, updates and management of Knowledge Graphs and their integration with 3rd party tools.
 
-The philosophy of a Knowledge Graph:
+## Philosophy:
+
+Mango🥭 does what you tell it to do. No more, no less. It is declarative in nature - you tell
+Mango🥭 what you want to have as the result and Mango🥭 makes it happen.
+
+## Knowledge Graph principles:
 
 1. Knowledge Graph stores knowledge of the real world as closely to how humans store it in their minds. Sane humans that is.
 2. All entities that are unique in the real world are kept unique in Knowledge Graph.
 3. Knowledge Graph can add new/store/update/remove old knowledge quickly and securely.
 4. Users can benefit if they provide schemas of how their knowledge should relate to already existing Knowledge Graph, but this is optional.
 
-Go to [doc](http://ooddaa.co) to read full documentation.
+Go to [doc](https://ooddaa.github.io/mango/) to read full documentation.
 
 ## Tests
 
