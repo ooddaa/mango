@@ -11,7 +11,7 @@ The philosophy of a Knowledge Graph:
 3. Knowledge Graph can add new/store/update/remove old knowledge quickly and securely.
 4. Users can benefit if they provide schemas of how their knowledge should relate to already existing Knowledge Graph, but this is optional.
 
-Go to (doc)[http://ooddaa.co] to read full documentation.
+Go to [doc](http://ooddaa.co) to read full documentation.
 
 ## Tests
 
