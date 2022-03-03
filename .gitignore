@@ -1,0 +1,14 @@
+node_modules/
+docs/
+config/
+.vs/
+.vscode/
+dist/
+
+dist
+uploads
+flow-typed
+.tern-port
+.idea
+cypress
+.log

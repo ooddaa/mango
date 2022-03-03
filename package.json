@@ -1,0 +1,73 @@
+{
+  "name": "mango",
+  "version": "1.0.2",
+  "public": true,
+  "main": "./lib/index.js",
+  "description": "Object-to-Graph Mapping tool for Node.js and Neo4j",
+  "repository": "github:ooddaa/mango.git",
+  "keywords": [
+    "graphs",
+    "structures",
+    "relations",
+    "knowledge graphs"
+  ],
+  "author": {
+    "name": "Oda Nabunaga",
+    "email": "dv@kappacoding.co.uk",
+    "url": "https://ooddaa.co"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/ooddaa/mango",
+  "scripts": {
+    "clean": "rimraf lib",
+    "dev": "cross-env NODE_ENV=development babel-node start.js",
+    "start": "cross-env NODE_ENV=production babel-node start.js",
+    "test": "cross-env NODE_ENV=testing jest --watch --runInBand",
+    "babel-node": "babel-node",
+    "flow": "node_modules/.bin/flow",
+    "flow-typed": "flow-typed",
+    "build": "cross-env BABEL_ENV=production ./node_modules/@babel/cli/bin/babel.js src --out-dir lib",
+    "prepare": "npm run clean&& npm run build",
+    "publish": "npm run clean&& npm run build&& git add --all&& git commit --message='publishing_new_build'&& git push",
+    "publish1": "npm run clean&& npm run build&& git add --all&& git rebase HEAD",
+    "document": "./node_modules/.bin/documentation build src/Mango.js -f html -o doc --shallow -w --access='public'"
+  },
+  "nodemonConfig": {
+    "ext": "js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "verbose": false
+  },
+  "engines": {
+    "node": ">=14.15.0"
+  },
+  "dependencies": {
+    "config": "^3.3.1",
+    "lodash": "^4.17.21",
+    "neo4j-driver": "^4.3.0",
+    "neo4j-driver-core": "^4.3.3",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.10.2",
+    "@babel/node": "^7.10.1",
+    "@babel/plugin-transform-runtime": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-flow": "^7.10.1",
+    "@babel/runtime": "^7.10.2",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "cross-env": "^7.0.3",
+    "documentation": "^13.2.5",
+    "flow": "^0.2.3",
+    "flow-bin": "^0.115.0",
+    "flow-typed": "^3.1.0",
+    "jest": "^23.6.0",
+    "jsdoc": "^3.6.10",
+    "moment-timezone": "^0.5.31",
+    "rimraf": "^3.0.2"
+  }
+}

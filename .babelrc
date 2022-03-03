@@ -1,0 +1,22 @@
+{
+  "targets": {
+    "node": 12,
+    "esmodules": true
+  },
+  "presets": ["@babel/preset-flow", "@babel/preset-env"],
+  "ignore": [],
+  "env": {
+    "production": {
+      "plugins": []
+    },
+    "development": {
+      "sourceMaps": true,
+      "retainLines": true
+    }
+  },
+  "plugins": [
+    ["transform-class-properties"],
+    ["@babel/plugin-transform-runtime"]
+  ],
+  "sourceType": "unambiguous"
+}
