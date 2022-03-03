@@ -28,8 +28,6 @@
     "flow-typed": "flow-typed",
     "build": "cross-env BABEL_ENV=production ./node_modules/@babel/cli/bin/babel.js src --out-dir lib",
     "prepare": "npm run clean&& npm run build",
-    "publish": "npm run clean&& npm run build&& git add --all&& git commit --message='publishing_new_build'&& git push",
-    "publish1": "npm run clean&& npm run build&& git add --all&& git rebase HEAD",
     "document": "./node_modules/.bin/documentation build src/Mango.js -f html -o doc --shallow -w --access='public'"
   },
   "nodemonConfig": {

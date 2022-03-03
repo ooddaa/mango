@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset='utf-8'>
-  <title>mango 1.0.1 | Documentation</title>
-  <meta name='description' content='Object-to-Graph Mapping tool'>
+  <title>mango 1.0.2 | Documentation</title>
+  <meta name='description' content='Object-to-Graph Mapping tool for Node.js and Neo4j'>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
   <link href='assets/bass.css' rel='stylesheet'>
   <link href='assets/style.css' rel='stylesheet'>
@@ -15,7 +15,7 @@
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>mango</h3>
-          <div class='mb1'><code>1.0.1</code></div>
+          <div class='mb1'><code>1.0.2</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
@@ -834,21 +834,25 @@ Namely, (startNode)-[:RELATIONSHIP]->(endNode).</p>
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// Find Nodes.</span>
 <span class="hljs-keyword">const</span> bob = <span class="hljs-keyword">await</span> mango.buildAndMergeNode([<span class="hljs-string">&quot;Person&quot;</span>], {
-  <span class="hljs-attr">FULL_NAME</span>: <span class="hljs-string">&quot;SpongeBob SquarePants&quot;</span>,
+ <span class="hljs-attr">FULL_NAME</span>: <span class="hljs-string">&quot;SpongeBob SquarePants&quot;</span>,
 });
 <span class="hljs-keyword">const</span> patrick = <span class="hljs-keyword">await</span> mango.buildAndMergeNode([<span class="hljs-string">&quot;Person&quot;</span>], {
-  <span class="hljs-attr">FULL_NAME</span>: <span class="hljs-string">&quot;Patrick Star&quot;</span>,
+ <span class="hljs-attr">FULL_NAME</span>: <span class="hljs-string">&quot;Patrick Star&quot;</span>,
 });
 
 <span class="hljs-comment">// Build a beautiful friendship!</span>
 <span class="hljs-keyword">const</span> relationship = <span class="hljs-keyword">await</span> mango.buildAndMergeRelationship(
-  bob,
-  [[<span class="hljs-string">&quot;IS_FRIENDS_WITH&quot;</span>]],
-  patrick
+ bob,
+ {
+   <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;IS_FRIENDS_WITH&quot;</span>],
+   <span class="hljs-attr">properties</span>: { <span class="hljs-attr">since</span>: <span class="hljs-string">&quot;forever&quot;</span> },
+ }
+ patrick
 );
 
+
 <span class="hljs-comment">// Check</span>
-<span class="hljs-comment">// (:Person { FULL_NAME: &quot;SpongeBob SquarePants&quot; })-[:IS_FRIENDS_WITH]-&gt;(:Person { FULL_NAME: &quot;Patrick Star&quot; })</span>
+<span class="hljs-comment">// (:Person { FULL_NAME: &quot;SpongeBob SquarePants&quot; })-[:IS_FRIENDS_WITH { since: &quot;forever&quot; }]-&gt;(:Person { FULL_NAME: &quot;Patrick Star&quot; })</span>
 <span class="hljs-comment">// exists</span>
 <span class="hljs-built_in">console</span>.log(relationship.isWritten()) <span class="hljs-comment">// true</span></pre>
     
