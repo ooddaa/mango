@@ -1,41 +1,35 @@
 # Mango 🥭
 
-An Object-to-Graph Mapping tool to build Knowledge Graphs with [Node.js](https://nodejs.org/) and [Neo4j](https://neo4j.com/).
+Goal: A tool that builds Knowledge Graphs and plants Knowledge Trees 🌳
 
-The idea behind the project is build a tool to facilitate creation, updates and management of Knowledge Graphs and their integration with 3rd party tools.
+Simply: it is an Object-to-Graph Mapping tool that you can use to work with [Neo4j](https://neo4j.com/) from your [Node.js](https://nodejs.org/) application.
+
+## Idea
+
+The idea behind the project is to build a tool to makes it easy to perform
+
+- Create
+- Read
+- Update
+- Delete
+  operations on Neo4j Graph Database using JavaScript.
 
 ## Philosophy:
 
-Mango🥭 does what you tell it to do. No more, no less. It is declarative in nature - you tell
-Mango🥭 what you want to have as the result and Mango🥭 makes it happen.
+Graphs are powerful because they are visually obvious. You may draw a graph to simplify something. It takes a purely abstract thought concept and makes it appear as a 2D model in front of your eyes.
 
-## Knowledge Graph principles:
+Graphs are powerful because they are simple. As a basic data structure a Node or (Node), can represent any amount of data. If (Node1) and (Node2) have a way to associate, then it could
+be expressed as (Node1)-[:RELATES_TO]->(Node2). And there you have it - a full blown Knowledge Graph!
 
-1. Knowledge Graph stores knowledge of the real world as closely to how humans store it in their minds. Sane humans that is.
-2. All entities that are unique in the real world are kept unique in Knowledge Graph.
-3. Knowledge Graph can add new/store/update/remove old knowledge quickly and securely.
-4. Users can benefit if they provide schemas of how their knowledge should relate to already existing Knowledge Graph, but this is optional.
+Now think of adding properties to Nodes and its Relationships and the expressive potential is limitless.
+
+Rich Knowledge Graphs can provide enough machine-readable context for humans to build useful
+real-world services.
 
 Go to [doc](https://ooddaa.github.io/mango/) to read full documentation.
 
 ## Tests
 
-To run tests, create a config directory and add a config/testing.json file to it. This will be the testing config file and will contain the follwing environment variables:
+To run tests, add Neo4j credentials to config/testing.json file:
 
 `{ "neo4jUsername": "neo4j", "neo4jPassword": "password", "ip": "0.0.0.0", "port": "7687", "env": "testing", "database": "test" }`
-
-Don't forget to create the 'test' database in Neo4j DBMS.
-
-In fact, add all of your configs to this directory. My config directory looks like:
-
-- default.json
-- development.json
-- production.json
-- testing.json
-
-Alternatively, you can do without it, and simply kick-start an Engine instance every time that you need it.
-But I find it easier to
-
-`import { engine } from './start.js'`;
-
-and supply Neo4j credentials via a config file as described above.
