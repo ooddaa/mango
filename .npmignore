@@ -1,0 +1,14 @@
+__tests__/
+.vs/
+.vscode/
+config/
+flow-typed/
+node_modules/
+src/
+start.js
+.babelrc
+.flowconfig
+.gitignore
+.gitconfig
+.npmignore
+todo.md

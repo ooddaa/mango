@@ -1,5 +1,5 @@
 {
-  "name": "mango",
+  "name": "manggo",
   "version": "1.0.2",
   "public": true,
   "main": "./lib/index.js",
@@ -13,7 +13,7 @@
   ],
   "author": {
     "name": "Oda Nabunaga",
-    "email": "dv@kappacoding.co.uk",
+    "email": "ooddaa@gmail.com",
     "url": "https://ooddaa.co"
   },
   "license": "MIT",
