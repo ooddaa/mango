@@ -9,7 +9,7 @@
     "graphs",
     "structures",
     "relations",
-    "knowledge graphs"
+    "knowledge graph"
   ],
   "author": {
     "name": "Oda Nabunaga",
@@ -17,7 +17,7 @@
     "url": "https://ooddaa.co"
   },
   "license": "MIT",
-  "homepage": "https://github.com/ooddaa/mango",
+  "homepage": "https://ooddaa.github.io/mango/",
   "scripts": {
     "clean": "rimraf lib",
     "dev": "cross-env NODE_ENV=development babel-node start.js",
@@ -30,9 +30,6 @@
     "prepare": "npm run clean&& npm run build",
     "document": "./node_modules/.bin/documentation build src/Mango.js -f html -o doc --shallow -w --access='public'"
   },
-  "nodemonConfig": {
-    "ext": "js"
-  },
   "jest": {
     "testEnvironment": "node",
     "verbose": false
@@ -41,13 +38,13 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
-    "config": "^3.3.1",
     "lodash": "^4.17.21",
     "neo4j-driver": "^4.3.0",
     "neo4j-driver-core": "^4.3.3",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "config": "^3.3.1",
     "@babel/cli": "^7.14.8",
     "@babel/core": "^7.10.2",
     "@babel/node": "^7.10.1",
