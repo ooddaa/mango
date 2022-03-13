@@ -46,6 +46,7 @@ import {
   not,
   isFalse,
   unwrapIfInArray,
+  stringify,
 } from "../utils";
 import { flatten as _flatten, isFunction } from "lodash";
 import clondeDeep from "lodash/cloneDeep";
@@ -195,12 +196,8 @@ class Engine {
     this.neo4jUsername = config.neo4jUsername;
     this.neo4jPassword = config.neo4jPassword;
     this.ip = config.ip || "0.0.0.0";
-    // this.ip = isPresent(config.ip) ? config.ip : "0.0.0.0";
     this.port = config.port || "7687";
-    // this.port = isPresent(config.port) ? config.port : "7687";
-    this.driver = config.driver || null; // start driver explicitly
     this.database = config.database || "neo4j";
-    // this.database = isPresent(config.database) ? config.database : "neo4j";
     this.sessionPool = {};
   }
 
@@ -256,7 +253,7 @@ class Engine {
    * We can check if dtabase is available.
    * https://neo4j.com/docs/api/javascript-driver/current/file/lib6/driver.js.html
    */
-  async verifyConnectivity(config: { database: string } = {}) {
+  async verifyConnectivity(config?: { database?: string } = {}): Object {
     if (this.driver) {
       return config.database && isString(config.database)
         ? await this.driver.verifyConnectivity({ database: config.database })
@@ -4116,10 +4113,6 @@ function closeSession({ session, sessionId }): Result {
 function closeDriver(driver): Result {
   driver.close();
   return new Success({ data: driver });
-}
-
-function stringify(val: any): string {
-  return JSON.stringify(val, null, 4);
 }
 
 export { Engine, wrapper, int, isInt, toNumber, inSafeRange };

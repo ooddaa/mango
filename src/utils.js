@@ -891,6 +891,10 @@ function unwrapIfInArray(val: any[]): any {
   return isArray(val) ? val[0] : val;
 }
 
+function stringify(val: any): string {
+  return JSON.stringify(val, null, 4);
+}
+
 export {
   log,
   superlog,
@@ -940,4 +944,5 @@ export {
   getPrivateProperties,
   generateTimeArrays,
   unwrapIfInArray,
+  stringify,
 };

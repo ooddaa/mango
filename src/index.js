@@ -60,6 +60,7 @@ export {
   getPrivateProperties,
   generateTimeArrays,
   unwrapIfInArray,
+  stringify,
 } from "./utils.js";
 
 export {
@@ -104,5 +105,5 @@ export {
   inSafeRange,
 } from "./Engine/index.js";
 export { RequiredValue } from "./RequiredValue.js";
-
+export { TransactionPropertiesValidationError, NoEngineError } from "./Errors";
 export { Mango, search } from "./Mango.js";

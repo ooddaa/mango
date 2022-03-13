@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isArray, isFunction, isObject } from "lodash";
+import { isArray, isFunction, isObject, isString, has } from "lodash";
 import {
   Builder,
   Engine,
@@ -22,6 +22,7 @@ import {
   getRequiredProperties,
   getOptionalProperties,
   getPrivateProperties,
+  stringify,
 } from "./utils";
 
 import { NoEngineError } from "./Errors";
@@ -79,17 +80,19 @@ import type {
  * @public
  * @module Mango
  * @see module:Builder
+ *
  * @see module:Engine
+ *
  * @param {Object} config - Configuration object.
  * @param {Engine} config.engine - Instance of an Engine class. If none is supplied, Mango will look for config.engineConfig. If that does not exist or is unusable, a NoEngineError will be thrown.
  * @param {Object} config.engineConfig - Configuration object to instantiate connection to Neo4j.
  * @param {string} config.engineConfig.username - Neo4j DBMS username.
  * @param {string} config.engineConfig.password - Neo4j DBMS password.
- * @param {string} config.engineConfig.ip - Neo4j DBMS IP to connect to. Default: '0.0.0.0'.
- * @param {string} config.engineConfig.port - Neo4j DBMS port to connect to. Default: '7687'.
- * @param {string} config.engineConfig.database - Neo4j DBMS database name to use. Default: 'neo4j'.
+ * @param {string?} [config.engineConfig.ip='0.0.0.0'] - Neo4j DBMS IP to connect to.
+ * @param {string?} [config.engineConfig.port='7687'] - Neo4j DBMS port to use
+ * @param {string?} [config.engineConfig.database='neo4j'] - Neo4j DBMS database name to use.
  *
- * @param {Builder} config.builder - Instance of a Builder class. If none is supplied, a generic one will be instantiated for you.
+ * @param {Builder?} [config.builder=new Builder()] - Instance of a Builder class. If none is supplied, a generic one will be instantiated for you.
  *
  * @example
  *
@@ -117,27 +120,68 @@ class Mango {
       builder: Builder,
     } = {}
   ) {
-    if (
-      isMissing(config.engine) &&
-      this._isEngineConfigUsable(config.engineConfig) == false
-    ) {
-      throw new NoEngineError(
-        `Mango.constructor: do not have a usable Engine instance.`
-      );
+    if (isMissing(config.engine)) {
+      try {
+        let engineConfigIsOk = this.constructor._isEngineConfigUsable(
+          config.engineConfig
+        );
+        if (engineConfigIsOk == false) {
+          throw new NoEngineError(
+            `Mango.constructor: do not have a usable Engine instance.`
+          );
+        }
+      } catch (error) {
+        log(
+          `Mango constructor engineConfig error.\nname: ${error.name}\nmessage: ${error.message}`
+        );
+        throw new NoEngineError(error.message);
+      }
     }
     this.engine = config.engine || this._initEngine(config.engineConfig);
     this.builder = config.builder || new Builder();
   }
 
   /**
+   * I want to communicate to users what is missing from configEngine.
+   * I'll do it by way of throwing errors at them.
+   *
    * @private
    * @param {Object} engineConfig - Configuration object to authenticate and initiate Neo4j driver.
    * @returns {boolean}
    */
-  _isEngineConfigUsable(engineConfig: Object): boolean {
-    /***@todo implement */
-    // { neo4jUsername, neo4jPassword, ip, port, database }
-    return false;
+  static _isEngineConfigUsable(engineConfig: Object): boolean {
+    /* username && password are sufficient to connect to default Neo4j DBMS */
+    if (has(engineConfig, "username") == false) {
+      throw new NoEngineError(
+        `Mango.constructor._isEnigneConfigUsable: no username found.\nengineConfig: ${stringify(
+          engineConfig
+        )}`
+      );
+    } else {
+      if (isString(engineConfig["username"]) == false) {
+        throw new NoEngineError(
+          `Mango.constructor._isEnigneConfigUsable: username must be string.\nengineConfig: ${stringify(
+            engineConfig
+          )}`
+        );
+      }
+    }
+    if (has(engineConfig, "password") == false) {
+      throw new NoEngineError(
+        `Mango.constructor._isEnigneConfigUsable: no password found.\nengineConfig: ${stringify(
+          engineConfig
+        )}`
+      );
+    } else {
+      if (isString(engineConfig["password"]) == false) {
+        throw new NoEngineError(
+          `Mango.constructor._isEnigneConfigUsable: password must be string.\nengineConfig: ${stringify(
+            engineConfig
+          )}`
+        );
+      }
+    }
+    return true;
   }
 
   /**
@@ -164,6 +208,16 @@ class Mango {
     /***@todo throw here if cannot connect */
 
     return engine;
+  }
+
+  async _verifyConnectivity(config?: { database?: string } = {}): Object {
+    if (this.engine instanceof Engine) {
+      return config.database && isString(config.database)
+        ? await this.engine.verifyConnectivity({ database: config.database })
+        : await this.engine.verifyConnectivity();
+    } else {
+      return { address: null, version: null, reason: "no engine" };
+    }
   }
 
   /**
@@ -368,7 +422,7 @@ class Mango {
    *  bob,
    *  {
    *    labels: ["IS_FRIENDS_WITH"],
-   *    properties: { since: "forever" },
+   *    properties: { since: "lazyDriver?: booleanforever" },
    *  }
    *  patrick
    * );
@@ -646,18 +700,18 @@ class Mango {
     return new ConditionContainer(condition, value);
   }
 
-  /**
-   * A shortcut to create a search condition.
-   * A non-static version of static search.
-   *
-   * @public
-   * @param {string} condition - Condition for value search ( > < >= <= == etc. ).
-   * @param {any} value - Searched value.
-   * @returns {ConditionContainer}
-   */
-  is(condition: string, value: any): ConditionContainer {
-    return this.search(condition, value);
-  }
+  // /**
+  //  * A shortcut to create a search condition.
+  //  * A non-static version of static search.
+  //  *
+  //  * @public
+  //  * @param {string} condition - Condition for value search ( > < >= <= == etc. ).
+  //  * @param {any} value - Searched value.
+  //  * @returns {ConditionContainer}
+  //  */
+  // is(condition: string, value: any): ConditionContainer {
+  //   return this.search(condition, value);
+  // }
 
   /**
    * Helper method to classify a POJO's properties into REQUIRED/optional/_private types.
