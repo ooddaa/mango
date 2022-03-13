@@ -510,8 +510,9 @@ class Mango {
   }
 
   /**
-   * Merges EnhancedNode into Neo4j. Ensures that specified pattern exists in Neo4j.
-   * Separates building of Nodes/Relationships from their merging.
+   * Merges EnhancedNode into Neo4j.
+   * Separates the building of Nodes/Relationships from their merging stage. You have to build EnhancedNodes
+   * with new Builder().buildEnhancedNodes first and then merge with this method.
    *
    * @public
    * @param {EnhancedNode} enode - EnhancedNode to merge into Neo4j.
@@ -526,17 +527,21 @@ class Mango {
    * // Merge a pattern to Neo4j:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
    *
-   * let person: EnhancedNode = builder.makeEnhancedNode(
+   * const person: EnhancedNode = builder.makeEnhancedNode(
+   *   // specify core, or "start", node
    *   builder.makeNode(["Person"], { NAME: "SpongeBob" }),
+   *   // specify relationships
    *   [
    *     builder.makeRelationshipCandidate(
    *       ["HAS_FRIEND"],
-   *       // or use
-   *       // builder.makeNode(["Person"], { NAME: "Patrick" })
-   *       await mango.buildAndMergeNode(["Person"], { NAME: "Patrick" })
+   *       // what is the endNode?
+   *       builder.makeNode(["Person"], { NAME: "Patrick" })
    *     ),
    *   ]
    * );
+   *
+   * const enode: EnhancedNode = await mango.mergeEnhancedNode(person)
+   * console.log(enode.isWritten()); // true
    */
   async mergeEnhancedNode(
     enode: EnhancedNode,
@@ -556,6 +561,80 @@ class Mango {
     if (config.returnResult) return result[0];
 
     return result[0].getData()[0];
+  }
+
+  /**
+   * Merges EnhancedNodes into Neo4j.
+   * A batch variant of Mango.mergeEnhancedNode.
+   *
+   * @public
+   * @param {EnhancedNode[]} enodes - EnhancedNode[] to merge into Neo4j.
+   * @param {Object} config - Configuration object.
+   * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
+   *
+   * {false} returns Relationship.
+   *
+   * @returns {Promise<Result|EnhancedNode[]>}
+   * @example
+   *
+   * // Merge a pattern to Neo4j:
+   * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
+   * // (:TVSeries { NAME: "SpongeBob SquarePants" })-[:HAS_WIKIPAGE]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
+   *
+   * const person: EnhancedNode = builder.makeEnhancedNode(
+   *   // specify core, or "start", node
+   *   builder.makeNode(["Person"], { NAME: "SpongeBob" }),
+   *   // specify relationships
+   *   [
+   *     builder.makeRelationshipCandidate(
+   *       ["HAS_FRIEND"],
+   *       // what is the endNode?
+   *       builder.makeNode(["Person"], { NAME: "Patrick" })
+   *     ),
+   *   ]
+   * );
+   *
+   * const wiki: EnhancedNode = builder.makeEnhancedNode(
+   *    builder.makeNode(["TVSeries"], { NAME: "SpongeBob SquarePants" }),
+   *    [
+   *      builder.makeRelationshipCandidate(
+   *        ["HAS_WIKIPAGE"],
+   *        builder.makeNode(["Webpage"], { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
+   *     ),
+   *    ]
+   * )
+   *
+   * const result: EnhancedNode[] = await mango.mergeEnhancedNodes([person, wiki])
+   * console.log(result[0].isWritten()); // true
+   * console.log(result[1].isWritten()); // true
+   */
+  async mergeEnhancedNodes(
+    enodes: EnhancedNode[],
+    config: Object = {}
+  ): Promise<Result | EnhancedNode> {
+    if (not(isArray(enodes))) {
+      throw new Error(
+        `Mango.mergeEnhancedNode: need an Array as the first argument: ${stringify(
+          enode,
+          null,
+          4
+        )}`
+      );
+    }
+    if (not(enodes.every(isEnhancedNode))) {
+      throw new Error(
+        `Mango.mergeEnhancedNode: need an EnhancedNode[] as the first argument: ${stringify(
+          enode,
+          null,
+          4
+        )}`
+      );
+    }
+    const result: Result[] = await this.engine.mergeEnhancedNodes(enodes);
+
+    if (config.returnResult) return result;
+
+    return result[0].getData();
   }
 
   /**
