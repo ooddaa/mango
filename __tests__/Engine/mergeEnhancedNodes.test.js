@@ -1541,9 +1541,13 @@ describe("use cases", () => {
       expect(enodes.every((enode) => enode.isWritten())).toEqual(true);
     });
   });
+
+  /**
+   * Testing if we can handle deep EnhancedNodes
+   */
   describe("enode of arbitrary depth exists", () => {
-    builder;
     test("three hops", async () => {
+      await engine.cleanDB();
       /* (A)-[r1]->(B)-[r2]->(C)-[r3]->(D) */
       const D = new NodeCandidate({
         labels: ["NodeD"],
@@ -1587,7 +1591,69 @@ describe("use cases", () => {
           required: [
             new RelationshipCandidate({
               labels: ["r1"],
-              // startNode:
+              endNode: B,
+              direction: "outbound",
+            }),
+          ],
+        }
+      );
+
+      const Aenode: EnhancedNode[] = (
+        await new Builder().buildEnhancedNodes([A])
+      ).map(getResultData);
+
+      const result: Result[] = await engine.mergeEnhancedNodes(Aenode);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.every(isSuccess)).toEqual(true);
+      const enode = result[0].firstDataElement;
+      expect(enode).toBeInstanceOf(EnhancedNode);
+      expect(enode.getParticipatingRelationships()).toHaveLength(3);
+    });
+    test("circular", async () => {
+      await engine.cleanDB();
+      /* (A)-[r1]->(B)-[r2]->(C)-[r3]->(A) */
+
+      const C = new EnhancedNodeCandidate(
+        new NodeCandidate({
+          labels: ["NodeC"],
+        }),
+        {
+          required: [
+            new RelationshipCandidate({
+              labels: ["r3"],
+              endNode: new NodeCandidate({
+                labels: ["NodeA"],
+              }),
+              direction: "outbound",
+            }),
+          ],
+        }
+      );
+
+      const B = new EnhancedNodeCandidate(
+        new NodeCandidate({
+          labels: ["NodeB"],
+        }),
+        {
+          required: [
+            new RelationshipCandidate({
+              labels: ["r2"],
+              endNode: C,
+              direction: "outbound",
+            }),
+          ],
+        }
+      );
+
+      const A = new EnhancedNodeCandidate(
+        new NodeCandidate({
+          labels: ["NodeA"],
+        }),
+        {
+          required: [
+            new RelationshipCandidate({
+              labels: ["r1"],
               endNode: B,
               direction: "outbound",
             }),

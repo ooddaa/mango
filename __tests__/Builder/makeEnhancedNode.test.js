@@ -94,4 +94,48 @@ describe("make an EnhancedNode out of POJOs", () => {
     // const results: Result[] = await engine.mergeEnhancedNodes([enode]);
     // expect(results[0].getData()[0].isWritten()).toEqual(true);
   });
+  test("deep enode", async () => {
+    /* (:Person { NAME: "Rob" })-[:HAS_FRIEND]->(:Person { NAME: "Charlie" })-[:HAS_ROOMMATE]->(:Person { NAME: "Frank" }) */
+    /* order is important */
+    const mn = builder.makeNode.bind(builder);
+    const mrc = builder.makeRelationshipCandidate.bind(builder);
+    const men = builder.makeEnhancedNode.bind(builder);
+
+    const rob = mn(["Person"], { NAME: "Rob" });
+    const frank = mn(["Person"], { NAME: "Frank" });
+    const hasRoommate = mrc(["HAS_ROOMMATE"], frank);
+    let charlie = mn(["Person"], { NAME: "Charlie" });
+    charlie = men(charlie, [hasRoommate]);
+
+    const hasFriend = mrc(["HAS_FRIEND"], charlie);
+    const enode = men(rob, [hasFriend]);
+
+    expect(enode).toBeInstanceOf(EnhancedNode);
+    expect(enode.getParticipatingRelationships()).toHaveLength(2);
+  });
+  // test.only("deep enode", async () => {
+  //   // (:Person { NAME: "Rob" })-[:HAS_FRIEND]->(:Person { NAME: "Charlie" })-[:HAS_ROOMMATE]->(:Person { NAME: "Frank" })
+  //   const mn = builder.makeNode.bind(builder);
+  //   const mrc = builder.makeRelationshipCandidate.bind(builder);
+  //   const men = builder.makeEnhancedNode.bind(builder);
+
+  //   const rob = mn(["Person"], { NAME: "Rob" });
+  //   const charlie = mn(["Person"], { NAME: "Charlie" });
+  //   const frank = mn(["Person"], { NAME: "Frank" });
+
+  //   const hasFriend = mrc(["HAS_FRIEND"], charlie);
+  //   const hasRoommate = mrc(["HAS_ROOMMATE"], frank);
+  //   const enode1 = men(rob, [hasFriend]);
+
+  //   expect(enode1).toBeInstanceOf(EnhancedNode);
+  //   log(enode1);
+
+  //   const enode2 = men(charlie, [hasRoommate]);
+  //   expect(enode2).toBeInstanceOf(EnhancedNode);
+
+  //   log(enode2);
+
+  //   // const results: Result[] = await engine.mergeEnhancedNodes([enode]);
+  //   // expect(results[0].getData()[0].isWritten()).toEqual(true);
+  // });
 });

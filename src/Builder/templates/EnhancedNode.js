@@ -425,7 +425,11 @@ function getParticipatingRelationships(
 }
 EnhancedNode.prototype.getParticipatingRelationships = getParticipatingRelationships;
 
-function getParticipatingRelationshipsByLabel(label): Relationship[] {}
+/**
+ * @todo implement!
+ * @param {string} label
+ */
+function getParticipatingRelationshipsByLabel(label: string): Relationship[] {}
 EnhancedNode.prototype.getParticipatingRelationshipsByLabel = getParticipatingRelationshipsByLabel;
 
 /**

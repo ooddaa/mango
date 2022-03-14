@@ -316,7 +316,8 @@ class Builder {
    * or [Failure.data = ENC|ValidationResult[]]. User will review ValidationResults,
    * either remove corresponding ENCs from the batch or update them and run again.
    *
-   * @param {EnhancedNodeCandidate[]} arr
+   * @param {EnhancedNodeCandidate[]} arr - Array of EnhancedNodeCandidates.
+   * @param {Object} obj - Configuration object.
    * @returns {Promise<Result[]>}
    * where
    * each Success.data = [EnhancedNode]
@@ -354,7 +355,7 @@ class Builder {
      * SO a new simpler idea.
      *
      * buildEnhancedNodes takes ONLY EnhancedNodeCandidate as its input material.
-     * 1. invokes buildNodes on its nodes - !!! or buildEnhancedNodes as well???
+     * 1. invokes buildNodes on its nodes - !!! or @todo buildEnhancedNodes to handle deep enodes.
      *    I'd prefer to collect relNodes via an array by reference.
      * 2. invokes buildRelationships on its relationships
      * 3. if all successful - returns Success.data = EnhancedNode

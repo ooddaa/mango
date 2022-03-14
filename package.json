@@ -1,6 +1,6 @@
 {
   "name": "manggo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "public": true,
   "main": "./lib/index.js",
   "description": "Object-to-Graph Mapping tool for Node.js and Neo4j",
@@ -19,15 +19,15 @@
   "license": "MIT",
   "homepage": "https://ooddaa.github.io/mango/",
   "scripts": {
-    "clean": "rimraf lib",
     "dev": "cross-env NODE_ENV=development babel-node start.js",
     "start": "cross-env NODE_ENV=production babel-node start.js",
     "test": "cross-env NODE_ENV=testing jest --watch --runInBand",
     "babel-node": "babel-node",
     "flow": "node_modules/.bin/flow",
     "flow-typed": "flow-typed",
+    "clean": "rimraf lib",
     "build": "cross-env BABEL_ENV=production ./node_modules/@babel/cli/bin/babel.js src --out-dir lib",
-    "prepare": "npm run clean&& npm run build",
+    "prepare": "npm run clean&& npm run build&& ./node_modules/.bin/documentation build src/Mango.js -f html -o docs --shallow --access='public'",
     "document": "./node_modules/.bin/documentation build src/Mango.js -f html -o doc --shallow -w --access='public'"
   },
   "jest": {
@@ -39,14 +39,13 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "neo4j-driver": "^4.3.0",
-    "neo4j-driver-core": "^4.3.3",
+    "neo4j-driver": "^4.4.3",
+    "neo4j-driver-core": "^4.4.3",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "config": "^3.3.1",
-    "@babel/cli": "^7.14.8",
-    "@babel/core": "^7.10.2",
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.5",
     "@babel/node": "^7.10.1",
     "@babel/plugin-transform-runtime": "^7.10.1",
     "@babel/preset-env": "^7.10.2",
@@ -55,11 +54,12 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-loader": "^8.1.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "config": "^3.3.1",
     "cross-env": "^7.0.3",
     "documentation": "^13.2.5",
     "flow": "^0.2.3",
     "flow-bin": "^0.115.0",
-    "flow-typed": "^3.1.0",
+    "flow-typed": "^3.7.0",
     "jest": "^23.6.0",
     "jsdoc": "^3.6.10",
     "moment-timezone": "^0.5.31",

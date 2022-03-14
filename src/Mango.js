@@ -352,7 +352,7 @@ class Mango {
    * @param {Object} config - Configuration object.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
-   * {false} returns Node[].
+   * {false} returns EnhancedNode.
    * @todo - allow opting out of Uniqueness Requirement.
    * @returns {Promise<Result|EnhancedNode>}
    * @example
@@ -368,7 +368,7 @@ class Mango {
     config: {
       returnResult: boolean,
     } = {}
-  ) {
+  ): Promise<Result | EnhancedNode> {
     const { requiredProps, optionalProps, privateProps } = this.decomposeProps(
       props
     );
@@ -519,7 +519,7 @@ class Mango {
    * @param {Object} config - Configuration object.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
-   * {false} returns Relationship.
+   * {false} returns EnhancedNode.
    *
    * @returns {Promise<Result|EnhancedNode>}
    * @example
@@ -534,7 +534,7 @@ class Mango {
    *   [
    *     builder.makeRelationshipCandidate(
    *       ["HAS_FRIEND"],
-   *       // what is the endNode?
+   *       // specify the endNode
    *       builder.makeNode(["Person"], { NAME: "Patrick" })
    *     ),
    *   ]
@@ -572,7 +572,7 @@ class Mango {
    * @param {Object} config - Configuration object.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
-   * {false} returns Relationship.
+   * {false} returns EnhancedNode[].
    *
    * @returns {Promise<Result|EnhancedNode[]>}
    * @example
@@ -588,7 +588,7 @@ class Mango {
    *   [
    *     builder.makeRelationshipCandidate(
    *       ["HAS_FRIEND"],
-   *       // what is the endNode?
+   *       // specify the endNode
    *       builder.makeNode(["Person"], { NAME: "Patrick" })
    *     ),
    *   ]
@@ -604,14 +604,14 @@ class Mango {
    *    ]
    * )
    *
-   * const result: EnhancedNode[] = await mango.mergeEnhancedNodes([person, wiki])
+   * const result: EnhancedNode[] = await mango.mergeEnhancedNodes([person, wiki]);
    * console.log(result[0].isWritten()); // true
    * console.log(result[1].isWritten()); // true
    */
   async mergeEnhancedNodes(
     enodes: EnhancedNode[],
     config: Object = {}
-  ): Promise<Result | EnhancedNode> {
+  ): Promise<Result | EnhancedNode[]> {
     if (not(isArray(enodes))) {
       throw new Error(
         `Mango.mergeEnhancedNode: need an Array as the first argument: ${stringify(
@@ -646,7 +646,7 @@ class Mango {
    * @param {SimplifiedEnhancedNodeObject} graphPattern - a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
-   * {false} returns Relationship.
+   * {false} returns EnhancedNode.
    *
    * @returns {Promise<Result|EnhancedNode>}
    * @example
@@ -705,6 +705,108 @@ class Mango {
     if (config.returnResult) return result[0];
 
     return result[0].getData()[0];
+  }
+
+  /**
+   * Builds and merges EnhancedNode (a subgraph) to Neo4j.
+   * Ensures that specified pattern exists in Neo4j.
+   * Allows a user-friendly declaration of a graph pattern that needs to be merged into Neo4j.
+   *
+   * @public
+   * @param {SimplifiedEnhancedNodeObject} graphPattern - a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
+   * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
+   *
+   * {false} returns EnhancedNode.
+   *
+   * @returns {Promise<Result|EnhancedNode>}
+   * @example
+   *
+   * import { isEnhancedNode, log } from 'mango';
+   *
+   * // Create the following pattern in Neo4j:
+   * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
+   *
+   * let person: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+   *  labels: ["Person"],
+   *  properties: { NAME: "Sponge Bob" },
+   *  relationships: [
+   *    {
+   *      labels: ["HAS_FRIEND"],
+   *      partnerNode: { labels: ["Person"], properties: { NAME: "Patrick" } },
+   *    },
+   *  ],
+   * });
+   *
+   * log(isEnhancedNode(person)); // true
+   * log(person.isWritten());     // true <- pattern is written to Neo4j
+   */
+  async buildAndMergeEnhancedNodes(
+    graphPatterns: SimplifiedEnhancedNodeObject[],
+    config: Object = {}
+  ): Promise<Result | EnhancedNode> {
+    const enodes = graphPatterns.map(
+      ({ labels, properties, relationships }) => {
+        const {
+          requiredProps,
+          optionalProps,
+          privateProps,
+        } = this.decomposeProps(properties);
+
+        /* there may be no relationships */
+        relationships = relationships || [];
+
+        const enode = this.builder.makeEnhancedNode(
+          this.builder.makeNode(labels, requiredProps, {
+            ...optionalProps,
+            ...privateProps,
+          }),
+
+          [
+            ...relationships.map(function processRelationship(relObject) {
+              const {
+                requiredProps,
+                optionalProps,
+                privateProps,
+              } = this.decomposeProps(relObject.partnerNode.properties);
+              return this.builder.makeRelationshipCandidate(
+                relObject.labels,
+                this.builder.makeEnhancedNode(
+                  this.builder.makeNode(
+                    relObject.partnerNode.labels,
+                    requiredProps,
+                    {
+                      ...optionalProps,
+                      ...privateProps,
+                    }
+                  ),
+                  [
+                    ...(relObject.partnerNode.relationships
+                      ? relObject.partnerNode.relationships.map(
+                          processRelationship
+                        )
+                      : []),
+                  ]
+                )
+                // this.builder.makeNode(
+                //   relObject.partnerNode.labels,
+                //   requiredProps,
+                //   {
+                //     ...optionalProps,
+                //     ...privateProps,
+                //   }
+                // )
+              );
+            }),
+          ]
+        );
+        return enode;
+      }
+    );
+    const results: Result[] = await this.engine.mergeEnhancedNodes(enodes);
+
+    if (config.returnResult) return results;
+
+    return results.map((result) => result.getData()[0]);
   }
 
   /**
