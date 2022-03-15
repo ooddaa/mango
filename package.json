@@ -29,7 +29,7 @@
     "build": "cross-env BABEL_ENV=production ./node_modules/@babel/cli/bin/babel.js src --out-dir lib",
     "prepare": "npm run clean&& npm run build&& ./node_modules/.bin/documentation build src/Mango.js -f html -o docs --shallow --access='public'",
     "document": "./node_modules/.bin/documentation build src/Mango.js -f html -o docs --shallow -w --access='public'",
-    "documentForGitHubPages": "./node_modules/.bin/documentation build src/Mango.js -f md -o docs --shallow --access='public'"
+    "documentForGitHubPages": "./node_modules/.bin/documentation build src/Mango.js -f md -o ./docs/index.md --shallow --access='public'"
   },
   "jest": {
     "testEnvironment": "node",

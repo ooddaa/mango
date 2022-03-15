@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-./node_modules/.bin/documentation build src/Mango.js -f md -o docs --shallow --access='public'
+npm run documentForGitHubPages
