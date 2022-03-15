@@ -41,7 +41,7 @@ describe("flat enode", () => {
   });
 });
 describe("deep enode", () => {
-  test("recursive - partner node built with mango.buildAndMergeEnhancedNode", async () => {
+  test("recursive 1", async () => {
     /// db setup
     await engine.cleanDB();
     /// !db setup
@@ -68,6 +68,59 @@ describe("deep enode", () => {
     expect(product1).toBeInstanceOf(EnhancedNode);
     expect(product1.isWritten()).toEqual(true);
     expect(product1.getParticipatingRelationships()).toHaveLength(2);
+  });
+  test("recursive 2", async () => {
+    /// db setup
+    await engine.cleanDB();
+    /// !db setup
+    /* (:Product1)-[:HAS_SUPPLEMENT]->(:Product2)-[:HAS_PRICE]->(:Price) */
+    let product1: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+      labels: ["Product1"],
+      properties: { NAME: "Bedrocan" },
+      relationships: [
+        {
+          labels: ["HAS_SUPPLEMENT"],
+          partnerNode: {
+            labels: ["Product2"],
+            properties: { NAME: "Bediol" },
+            relationships: [
+              {
+                labels: ["HAS_PRICE"],
+                partnerNode: { labels: ["Price"], properties: { VALUE: 123 } },
+              },
+              {
+                labels: ["AT_DISPENSARY"],
+                partnerNode: {
+                  labels: ["Dispensary"],
+                  properties: { VALUE: "Magic" },
+                  relationships: [
+                    {
+                      labels: ["LOCATED_AT"],
+                      properties: { dateFrom: [2022, 3, 15] },
+                      partnerNode: {
+                        labels: ["City"],
+                        properties: { NAME: "London" },
+                      },
+                    },
+                    {
+                      labels: ["AT_DISPENSARY"],
+                      direction: "inbound",
+                      partnerNode: {
+                        labels: ["Product1"],
+                        properties: { NAME: "Bedrocan" },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(product1).toBeInstanceOf(EnhancedNode);
+    expect(product1.isWritten()).toEqual(true);
+    expect(product1.getParticipatingRelationships()).toHaveLength(5);
   });
 });
 

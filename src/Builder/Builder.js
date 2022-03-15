@@ -47,15 +47,8 @@ import {
   isTrue,
   isFalse,
   decomposeProps,
+  stringify,
 } from "../utils";
-
-// import has from "lodash/has";
-// import keys from "lodash/keys";
-// import entries from "lodash/entries";
-// import isArray from "lodash/isArray";
-// import isString from "lodash/isString";
-// import flatten from "lodash/flatten";
-// import cloneDeep from "lodash/cloneDeep";
 
 import type {
   nodeObj,
@@ -1154,8 +1147,17 @@ class Builder {
     });
   }
 
+  /**
+   * Recursively builds an EnhancedNode from various building blocks.
+   *
+   * @public
+   * @param {Node|SimplifiedNode} coreNode - Main Node, 'root' of the tree.
+   * @param {SimplifiedRelationship[]| SimplifiedRelationshipArray[]| Relationship[]| RelationshipCandidate[]} requiredRels - "Must-have" Relationships
+   * @param {SimplifiedRelationship[]| SimplifiedRelationshipArray[]| Relationship[]| RelationshipCandidate[]} optionalRels - Optional Relationships.
+   * @returns {EnhancedNode}
+   */
   makeEnhancedNode(
-    coreNode: Node,
+    coreNode: Node | SimplifiedNode,
     requiredRels:
       | SimplifiedRelationship[]
       | SimplifiedRelationshipArray[]
@@ -1167,35 +1169,68 @@ class Builder {
       | Relationship[]
       | RelationshipCandidate[]
   ): EnhancedNode {
+    /* Bind all methods so they are usable in recursive iteration. */
     const makeRelationshipCandidate = this.makeRelationshipCandidate.bind(this);
     const makeEnhancedNode = this.makeEnhancedNode.bind(this);
     const makeNode = this.makeNode.bind(this);
-    let rels = requiredRels.map(function processRelationship(relationship) {
+
+    /* Build a full Node out of SimplifiedNode */
+    if (isSimplifiedNode(coreNode)) {
+      coreNode = makeNode(
+        coreNode.labels,
+        ...decomposeProps(coreNode.properties, {
+          asArray: true,
+        })
+      );
+    }
+
+    /* All recursive work is done here */
+    const relationships: RelationshipCandidate[] = requiredRels.map(
+      _processRelationship
+    );
+
+    const candidate: EnhancedNodeCandidate = this.makeEnhancedNodeCandidate(
+      coreNode,
+      relationships
+    );
+
+    const result: Result = this.buildEnhancedNodes([candidate]);
+
+    if (isFailure(result)) {
+      throw new Error(
+        `Builder.makeNode: failed to create an EnhancedNode.\nresult ${JSON.stringify(
+          result
+        )}`
+      );
+    }
+    return result[0].firstDataElement;
+
+    /* Local Functions
+    _________________________________________________________*/
+    function _processRelationship(relationship) {
       if (isSimplifiedRelationship(relationship)) {
         let { labels, partnerNode, properties, direction } = relationship;
+
+        /* Simple end case. */
         if (isSimplifiedNode(partnerNode)) {
-          const { requiredProps, optionalProps, privateProps } = decomposeProps(
-            partnerNode.properties
-          );
           partnerNode = makeNode(
             partnerNode.labels,
-            requiredProps,
-            optionalProps,
-            privateProps
+            ...decomposeProps(partnerNode.properties, {
+              asArray: true,
+            })
           );
         }
+
+        /* Deal with deep EnhancedNode recursively */
         if (isSimplifiedEnhancedNode(partnerNode)) {
-          const { requiredProps, optionalProps, privateProps } = decomposeProps(
-            partnerNode.properties
-          );
           partnerNode = makeEnhancedNode(
             makeNode(
               partnerNode.labels,
-              requiredProps,
-              optionalProps,
-              privateProps
+              ...decomposeProps(partnerNode.properties, {
+                asArray: true,
+              })
             ),
-            /* all required rels for now */
+            /* Mark all relationships as required for now. */
             partnerNode.relationships
           );
         }
@@ -1207,25 +1242,16 @@ class Builder {
           direction
         );
       }
-      return relationship;
-    });
 
-    const candidate: EnhancedNodeCandidate = this.makeEnhancedNodeCandidate(
-      coreNode,
-      rels
-      // optionalRels //
-    );
-    // log(candidate);
-    const result = this.buildEnhancedNodes([candidate]);
-    // log(result)
-    if (isFailure(result)) {
-      throw new Error(
-        `Builder.makeNode: failed to create an EnhancedNode.\nresult ${JSON.stringify(
-          result
-        )}`
-      );
+      /**@todo add checks for other rel types */
+      if (not(isAcceptableRelationship(relationship))) {
+        throw new Error(`Builder.makeEnhancedNode._processRelationship: relationship is not acceptable, must be one of SimplifiedRelationship
+        | SimplifiedRelationshipArray
+        | Relationship
+        | RelationshipCandidate.\nrelationship: ${stringify(relationship)}`);
+      }
+      return relationship;
     }
-    return result[0].firstDataElement;
   }
 
   makeRelationshipCandidate(
@@ -1322,32 +1348,30 @@ function isRelationshipsOk(relationships: any): boolean {
   if (relationships.length == 0) {
     return true;
   }
-  const results = relationships.map(_isAcceptableRelationship);
+  const results = relationships.map(isAcceptableRelationship);
   // log(results);
   return results.every(isTrue);
+}
 
-  /* Local Functions
-  _________________________________________________________*/
-  function _isAcceptableRelationship(obj: any): boolean {
-    if (isArray(obj)) {
-      if (isSimplifiedRelationshipArray(obj)) {
-        return true;
-      }
-    }
-
-    if (not(isObject(obj))) {
-      return false;
-    }
-
-    if (
-      isRelationshipCandidate(obj) ||
-      isRelationship(obj) ||
-      isSimplifiedRelationship(obj)
-    ) {
+function isAcceptableRelationship(obj: any): boolean {
+  if (isArray(obj)) {
+    if (isSimplifiedRelationshipArray(obj)) {
       return true;
     }
+  }
+
+  if (not(isObject(obj))) {
     return false;
   }
+
+  if (
+    isRelationshipCandidate(obj) ||
+    isRelationship(obj) ||
+    isSimplifiedRelationship(obj)
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function isSimplifiedRelationship(obj: any): boolean {
@@ -1369,16 +1393,18 @@ function isSimplifiedRelationship(obj: any): boolean {
 }
 
 function isSimplifiedNode(obj: any): boolean {
-  /* { labels: string[], properties: Object } */
+  /* { labels: string[], properties: Object, } */
   if (not(isObject(obj))) {
     return false;
   }
-  let { labels, properties } = obj;
+  let { labels, properties, relationships } = obj;
   const conditions = {
     labelsOk: isLabelsOk(labels),
     propertiesOk: isPropertiesOk(properties),
+    noRelationships:
+      isMissing(relationships) ||
+      (isArray(relationships) && relationships.length == 0),
   };
-  // log("isSimplifiedNode ", conditions);
 
   if (values(conditions).every(isTrue)) {
     return true;

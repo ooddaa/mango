@@ -20,7 +20,7 @@ const dbProps = {
 };
 
 describe("clean DB", () => {
-  test("partner node built with mango.buildAndMergeNodes", async () => {
+  test("multiple deep enodes", async () => {
     /// db setup
     await engine.cleanDB();
     /// !db setup
@@ -35,6 +35,15 @@ describe("clean DB", () => {
             partnerNode: {
               labels: ["Product2"],
               properties: { NAME: "Pepsi" },
+              relationships: [
+                {
+                  labels: ["HAS_PRICE"],
+                  partnerNode: {
+                    labels: ["Price"],
+                    properties: { VALUE: 123 },
+                  },
+                },
+              ],
             },
           },
         ],
@@ -48,17 +57,29 @@ describe("clean DB", () => {
             partnerNode: {
               labels: ["Product3"],
               properties: { NAME: "Coca-cola lite" },
+              relationships: [
+                {
+                  labels: ["HAS_PRICE"],
+                  partnerNode: {
+                    labels: ["Price"],
+                    properties: { VALUE: 456 },
+                  },
+                },
+              ],
             },
           },
         ],
       },
     ]);
-    // log(product1);
+    // log(products);
     expect(products).toBeInstanceOf(Array);
     expect(products[0]).toBeInstanceOf(EnhancedNode);
     expect(products[0].isWritten()).toEqual(true);
     expect(products[1]).toBeInstanceOf(EnhancedNode);
     expect(products[1].isWritten()).toEqual(true);
+
+    expect(products[0].getParticipatingRelationships()).toHaveLength(2);
+    expect(products[1].getParticipatingRelationships()).toHaveLength(2);
   });
   test("example1 flat", async () => {
     // Merge a pattern to Neo4j:
@@ -178,10 +199,12 @@ describe("clean DB", () => {
               //
               // deep enode
               //
-              relationships: {
-                labels: ["MENTIONS"],
-                partnerNode: bikiniBottom,
-              },
+              relationships: [
+                {
+                  labels: ["MENTIONS"],
+                  partnerNode: bikiniBottom,
+                },
+              ],
             },
           },
           {

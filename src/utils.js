@@ -17,6 +17,8 @@ import _isNumber from "lodash/isNumber";
 import _isObject from "lodash/isObject";
 import isArray from "lodash/isArray";
 
+import { values } from "lodash";
+
 import fs from "fs";
 import path from "path";
 import util from "util";
@@ -701,6 +703,7 @@ function getMonthNumber({ month = "", asString = true } = {}): String | Number {
 function neo4jNumberToNumber(number: object | number | string): number {}
 
 import crypto from "crypto";
+import { entries } from "lodash";
 
 function hasher(data: string): string {
   const hash = crypto.createHash("sha256");
@@ -895,12 +898,16 @@ function stringify(val: any): string {
   return JSON.stringify(val, null, 4);
 }
 
-function decomposeProps(props: Object): Object {
-  return {
+function decomposeProps(props: Object, config: Object = {}): Object {
+  const result = {
     requiredProps: getRequiredProperties(props),
     optionalProps: getOptionalProperties(props),
     privateProps: getPrivateProperties(props),
   };
+  if (config.asArray) {
+    return values(result);
+  }
+  return result;
 }
 
 export {
