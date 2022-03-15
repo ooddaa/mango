@@ -895,6 +895,14 @@ function stringify(val: any): string {
   return JSON.stringify(val, null, 4);
 }
 
+function decomposeProps(props: Object): Object {
+  return {
+    requiredProps: getRequiredProperties(props),
+    optionalProps: getOptionalProperties(props),
+    privateProps: getPrivateProperties(props),
+  };
+}
+
 export {
   log,
   superlog,
@@ -945,4 +953,5 @@ export {
   generateTimeArrays,
   unwrapIfInArray,
   stringify,
+  decomposeProps,
 };

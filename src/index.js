@@ -61,6 +61,7 @@ export {
   generateTimeArrays,
   unwrapIfInArray,
   stringify,
+  decomposeProps,
 } from "./utils.js";
 
 export {

@@ -19,7 +19,7 @@ const dbProps = {
   identity: { low: expect.any(Number), high: 0 },
 };
 
-describe("clean DB", () => {
+describe("flat enode", () => {
   test("partner node built with mango.buildAndMergeNode", async () => {
     /// db setup
     await engine.cleanDB();
@@ -38,6 +38,36 @@ describe("clean DB", () => {
     // log(product1);
     expect(product1).toBeInstanceOf(EnhancedNode);
     expect(product1.isWritten()).toEqual(true);
+  });
+});
+describe("deep enode", () => {
+  test("recursive - partner node built with mango.buildAndMergeEnhancedNode", async () => {
+    /// db setup
+    await engine.cleanDB();
+    /// !db setup
+    /* (:Product1)-[:HAS_SUPPLEMENT]->(:Product2)-[:HAS_PRICE]->(:Price) */
+    let product1: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+      labels: ["Product1"],
+      properties: { NAME: "Bedrocan" },
+      relationships: [
+        {
+          labels: ["HAS_SUPPLEMENT"],
+          partnerNode: {
+            labels: ["Product2"],
+            properties: { NAME: "Bediol" },
+            relationships: [
+              {
+                labels: ["HAS_PRICE"],
+                partnerNode: { labels: ["Price"], properties: { VALUE: 123 } },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(product1).toBeInstanceOf(EnhancedNode);
+    expect(product1.isWritten()).toEqual(true);
+    expect(product1.getParticipatingRelationships()).toHaveLength(2);
   });
 });
 

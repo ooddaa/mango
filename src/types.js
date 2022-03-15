@@ -37,6 +37,7 @@ export type properties = Object;
 export type identity = number | string | null;
 
 export type partialNodeObj = { labels: string[], properties: Object };
+
 export type nodeObj = {
   labels: string[],
   properties: { required: Object, optional: Object },
@@ -103,16 +104,17 @@ export type SimplifiedRelationshipArray = [
   "outbound" | ">" | "inbound" | "<"
 ];
 
-export type SimplifiedRelationshipObject = {
+export type SimplifiedRelationship = {
   labels: string[],
   properties?: Object,
   necessity?: "required" | "optional",
   direction?: "outbound" | ">" | "inbound" | "<",
-  partnerNode?: SimplifiedEnhancedNodeObject | Node | EnhancedNode, // Node/EnhancedNodeCandidates??// startNode?: SimplifiedEnhancedNodeObject | Node | EnhancedNode, // Node/EnhancedNodeCandidates??
+  partnerNode?: SimplifiedEnhancedNode | Node | EnhancedNode, // Node/EnhancedNodeCandidates??// startNode?: SimplifiedEnhancedNode | Node | EnhancedNode, // Node/EnhancedNodeCandidates??
 };
+export type SimplifiedNode = { labels: string[], properties: Object };
 
-export type SimplifiedEnhancedNodeObject = {
+export type SimplifiedEnhancedNode = {
   labels: string[],
   properties: Object,
-  relationships: SimplifiedRelationshipObject[],
+  relationships: SimplifiedRelationship[],
 };

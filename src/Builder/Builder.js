@@ -44,16 +44,40 @@ import {
   log,
   isMissing,
   isPresent,
+  isTrue,
+  isFalse,
+  decomposeProps,
 } from "../utils";
 
-import has from "lodash/has";
-import keys from "lodash/keys";
-import entries from "lodash/entries";
-import isArray from "lodash/isArray";
-import flatten from "lodash/flatten";
-import cloneDeep from "lodash/cloneDeep";
+// import has from "lodash/has";
+// import keys from "lodash/keys";
+// import entries from "lodash/entries";
+// import isArray from "lodash/isArray";
+// import isString from "lodash/isString";
+// import flatten from "lodash/flatten";
+// import cloneDeep from "lodash/cloneDeep";
 
-import type { nodeObj, enhancedNodeObj, relationshipsTemplate } from "../types";
+import type {
+  nodeObj,
+  enhancedNodeObj,
+  relationshipsTemplate,
+  SimplifiedRelationship,
+  SimplifiedNode,
+  SimplifiedEnhancedNode,
+} from "../types";
+
+import {
+  has,
+  keys,
+  entries,
+  isObject,
+  isArray,
+  isString,
+  flatten,
+  cloneDeep,
+  values,
+  every,
+} from "lodash";
 
 /**
  * @class
@@ -1132,14 +1156,66 @@ class Builder {
 
   makeEnhancedNode(
     coreNode: Node,
-    requiredRels: Relationship[] | RelationshipCandidate[],
-    optionalRels: Relationship[] | RelationshipCandidate[]
+    requiredRels:
+      | SimplifiedRelationship[]
+      | SimplifiedRelationshipArray[]
+      | Relationship[]
+      | RelationshipCandidate[],
+    optionalRels:
+      | SimplifiedRelationship[]
+      | SimplifiedRelationshipArray[]
+      | Relationship[]
+      | RelationshipCandidate[]
   ): EnhancedNode {
-    const candidate = this.makeEnhancedNodeCandidate(
+    const makeRelationshipCandidate = this.makeRelationshipCandidate.bind(this);
+    const makeEnhancedNode = this.makeEnhancedNode.bind(this);
+    const makeNode = this.makeNode.bind(this);
+    let rels = requiredRels.map(function processRelationship(relationship) {
+      if (isSimplifiedRelationship(relationship)) {
+        let { labels, partnerNode, properties, direction } = relationship;
+        if (isSimplifiedNode(partnerNode)) {
+          const { requiredProps, optionalProps, privateProps } = decomposeProps(
+            partnerNode.properties
+          );
+          partnerNode = makeNode(
+            partnerNode.labels,
+            requiredProps,
+            optionalProps,
+            privateProps
+          );
+        }
+        if (isSimplifiedEnhancedNode(partnerNode)) {
+          const { requiredProps, optionalProps, privateProps } = decomposeProps(
+            partnerNode.properties
+          );
+          partnerNode = makeEnhancedNode(
+            makeNode(
+              partnerNode.labels,
+              requiredProps,
+              optionalProps,
+              privateProps
+            ),
+            /* all required rels for now */
+            partnerNode.relationships
+          );
+        }
+
+        return makeRelationshipCandidate(
+          labels,
+          partnerNode,
+          properties,
+          direction
+        );
+      }
+      return relationship;
+    });
+
+    const candidate: EnhancedNodeCandidate = this.makeEnhancedNodeCandidate(
       coreNode,
-      requiredRels,
-      optionalRels
+      rels
+      // optionalRels //
     );
+    // log(candidate);
     const result = this.buildEnhancedNodes([candidate]);
     // log(result)
     if (isFailure(result)) {
@@ -1160,20 +1236,10 @@ class Builder {
   ): RelationshipCandidate {
     let outbound = ["outbound", ">"].includes(direction);
     let inbound = ["inbound", "<"].includes(direction);
-    if (
-      isMissing(direction) ||
-      not(outbound || inbound)
-      // isMissing(direction) ||
-      // not(direction == "outbound" || direction == "inbound")
-    ) {
-      /* default to outbound */
+    if (isMissing(direction) || not(outbound || inbound)) {
+      /* defaults to outbound */
       direction = "outbound";
       outbound = true;
-      // log("wassap");
-      // log(partnerNode);
-      // throw new Error(
-      //   `Builder.makeRelationshipCandidate: expect a outbound/inbound direction specified.\ndirection: ${direction}`
-      // );
     }
     if (outbound) {
       return new RelationshipCandidate({
@@ -1191,6 +1257,152 @@ class Builder {
         startNode: partnerNode,
       });
     }
+  }
+}
+
+function isLabelsOk(labels: any): boolean {
+  /* { labels: string[] } */
+  if (
+    labels &&
+    isArray(labels) &&
+    labels.length !== 0 &&
+    labels.every(isString)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function isPartnerNodeOk(partnerNode: any): boolean {
+  /* { partnerNode: partialNodeObj | NodeCandidate | Node } */
+  const conditions = {
+    isSimplifiedNode: false,
+    isSimplifiedEnhancedNode: false,
+    isNodeCandidate: false,
+    isEnhancedNodeCandidate: false,
+    isNode: false,
+    isEnhancedNode: false,
+  };
+
+  if (isSimplifiedNode(partnerNode)) {
+    conditions.isSimplifiedNode = true;
+  }
+  if (isSimplifiedEnhancedNode(partnerNode)) {
+    conditions.isSimplifiedEnhancedNode = true;
+  }
+  if (isNodeCandidate(partnerNode)) {
+    conditions.isNodeCandidate = true;
+  }
+  if (isEnhancedNodeCandidate(partnerNode)) {
+    conditions.isEnhancedNodeCandidate = true;
+  }
+  if (isNode(partnerNode)) {
+    conditions.isNode = true;
+  }
+  if (isEnhancedNode(partnerNode)) {
+    conditions.isEnhancedNode = true;
+  }
+  return values(conditions).some(isTrue);
+}
+
+function isPropertiesOk(properties: any): boolean {
+  /* { properties: Object } */
+  if (isObject(properties)) {
+    return true;
+  }
+  return false;
+}
+
+function isRelationshipsOk(relationships: any): boolean {
+  /* { relationships: [] | SimplifiedRelationship[] | SimplifiedRelationshipArray[] | RelationshipCandidate[] | Relationship[] } */
+  if (not(isArray(relationships))) {
+    return false;
+  }
+
+  if (relationships.length == 0) {
+    return true;
+  }
+  const results = relationships.map(_isAcceptableRelationship);
+  // log(results);
+  return results.every(isTrue);
+
+  /* Local Functions
+  _________________________________________________________*/
+  function _isAcceptableRelationship(obj: any): boolean {
+    if (isArray(obj)) {
+      if (isSimplifiedRelationshipArray(obj)) {
+        return true;
+      }
+    }
+
+    if (not(isObject(obj))) {
+      return false;
+    }
+
+    if (
+      isRelationshipCandidate(obj) ||
+      isRelationship(obj) ||
+      isSimplifiedRelationship(obj)
+    ) {
+      return true;
+    }
+    return false;
+  }
+}
+
+function isSimplifiedRelationship(obj: any): boolean {
+  if (not(isObject(obj))) {
+    return false;
+  }
+  // log(obj);
+  let { labels, partnerNode } = obj;
+  const conditions = {
+    labelsOk: isLabelsOk(labels),
+    partnerNodeOk: isPartnerNodeOk(partnerNode),
+  };
+  // log(conditions);
+  if (values(conditions).every(isTrue)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function isSimplifiedNode(obj: any): boolean {
+  /* { labels: string[], properties: Object } */
+  if (not(isObject(obj))) {
+    return false;
+  }
+  let { labels, properties } = obj;
+  const conditions = {
+    labelsOk: isLabelsOk(labels),
+    propertiesOk: isPropertiesOk(properties),
+  };
+  // log("isSimplifiedNode ", conditions);
+
+  if (values(conditions).every(isTrue)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function isSimplifiedEnhancedNode(obj: any): boolean {
+  /* { labels: string[], properties: Object, relationships: SimplifiedRelationship[] } */
+  if (not(isObject(obj))) {
+    return false;
+  }
+  let { labels, properties, relationships } = obj;
+  const conditions = {
+    labelsOk: isLabelsOk(labels),
+    propertiesOk: isPropertiesOk(properties),
+    relationshipsOk: isRelationshipsOk(relationships),
+  };
+
+  if (values(conditions).every(isTrue)) {
+    return true;
+  } else {
+    return false;
   }
 }
 

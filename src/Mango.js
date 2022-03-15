@@ -29,7 +29,7 @@ import { NoEngineError } from "./Errors";
 import type {
   SimplifiedRelationshipArray,
   SimplifiedRelationshipObject,
-  SimplifiedEnhancedNodeObject,
+  SimplifiedEnhancedNode,
 } from "./types";
 
 /**
@@ -643,7 +643,7 @@ class Mango {
    * Allows a user-friendly declaration of a graph pattern that needs to be merged into Neo4j.
    *
    * @public
-   * @param {SimplifiedEnhancedNodeObject} graphPattern - a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
+   * @param {SimplifiedEnhancedNode} graphPattern - a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
    * {false} returns EnhancedNode.
@@ -671,31 +671,62 @@ class Mango {
    * log(person.isWritten());     // true <- pattern is written to Neo4j
    */
   async buildAndMergeEnhancedNode(
-    graphPattern: SimplifiedEnhancedNodeObject,
+    { labels, properties, relationships }: SimplifiedEnhancedNode,
     config: Object = {}
   ): Promise<Result | EnhancedNode> {
     const { requiredProps, optionalProps, privateProps } = this.decomposeProps(
-      graphPattern.properties
+      properties
     );
+    /* there may be no relationships */
+    relationships = relationships || [];
+
     const enode = this.builder.makeEnhancedNode(
-      this.builder.makeNode(graphPattern.labels, requiredProps, {
+      this.builder.makeNode(labels, requiredProps, {
         ...optionalProps,
         ...privateProps,
       }),
 
       [
-        ...graphPattern.relationships.map((relObject) => {
+        ...relationships.map((relObject) => {
+          let { labels, partnerNode, properties = {} } = relObject;
+          if (isMissing(partnerNode)) {
+            throw new Error(
+              `Mango.buildAndMergeEnhancedNode: missing partnerNode in relationship.\nrelObject: ${stringify(
+                relObject
+              )}`
+            );
+          }
           const {
             requiredProps,
             optionalProps,
             privateProps,
-          } = this.decomposeProps(relObject.partnerNode.properties);
-          return this.builder.makeRelationshipCandidate(
-            relObject.labels,
-            this.builder.makeNode(relObject.partnerNode.labels, requiredProps, {
+          } = this.decomposeProps(partnerNode.properties);
+
+          /* deal with partner node */
+          partnerNode = this.builder.makeNode(
+            partnerNode.labels,
+            requiredProps,
+            {
               ...optionalProps,
               ...privateProps,
-            })
+            }
+          );
+
+          /* do we have deep subgraph here?  */
+          if (
+            relObject.partnerNode.relationships &&
+            relObject.partnerNode.relationships.length
+          ) {
+            partnerNode = this.builder.makeEnhancedNode(
+              partnerNode,
+              /**@todo make all relationships required for now, we may filter them later */
+              relObject.partnerNode.relationships
+            );
+          }
+
+          return this.builder.makeRelationshipCandidate(
+            relObject.labels,
+            partnerNode
           );
         }),
       ]
@@ -713,7 +744,7 @@ class Mango {
    * Allows a user-friendly declaration of a graph pattern that needs to be merged into Neo4j.
    *
    * @public
-   * @param {SimplifiedEnhancedNodeObject} graphPattern - a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
+   * @param {SimplifiedEnhancedNode} graphPattern - a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
    * {false} returns EnhancedNode.
@@ -741,73 +772,132 @@ class Mango {
    * log(person.isWritten());     // true <- pattern is written to Neo4j
    */
   async buildAndMergeEnhancedNodes(
-    graphPatterns: SimplifiedEnhancedNodeObject[],
+    graphPatterns: SimplifiedEnhancedNode[],
     config: Object = {}
   ): Promise<Result | EnhancedNode> {
-    const enodes = graphPatterns.map(
-      ({ labels, properties, relationships }) => {
-        const {
-          requiredProps,
-          optionalProps,
-          privateProps,
-        } = this.decomposeProps(properties);
-
-        /* there may be no relationships */
-        relationships = relationships || [];
-
-        const enode = this.builder.makeEnhancedNode(
-          this.builder.makeNode(labels, requiredProps, {
-            ...optionalProps,
-            ...privateProps,
-          }),
-
-          [
-            ...relationships.map(function processRelationship(relObject) {
-              const {
-                requiredProps,
-                optionalProps,
-                privateProps,
-              } = this.decomposeProps(relObject.partnerNode.properties);
-              return this.builder.makeRelationshipCandidate(
-                relObject.labels,
-                this.builder.makeEnhancedNode(
-                  this.builder.makeNode(
-                    relObject.partnerNode.labels,
-                    requiredProps,
-                    {
-                      ...optionalProps,
-                      ...privateProps,
-                    }
-                  ),
-                  [
-                    ...(relObject.partnerNode.relationships
-                      ? relObject.partnerNode.relationships.map(
-                          processRelationship
-                        )
-                      : []),
-                  ]
-                )
-                // this.builder.makeNode(
-                //   relObject.partnerNode.labels,
-                //   requiredProps,
-                //   {
-                //     ...optionalProps,
-                //     ...privateProps,
-                //   }
-                // )
-              );
-            }),
-          ]
-        );
-        return enode;
-      }
-    );
-    const results: Result[] = await this.engine.mergeEnhancedNodes(enodes);
-
-    if (config.returnResult) return results;
-
-    return results.map((result) => result.getData()[0]);
+    // const enodes = graphPatterns.map(
+    //   ({ labels, properties, relationships }) => {
+    //     const {
+    //       requiredProps,
+    //       optionalProps,
+    //       privateProps,
+    //     } = this.decomposeProps(properties);
+    //     const coreNode  = this.builder.makeNode(labels, requiredProps, {
+    //       ...optionalProps,
+    //       ...privateProps,
+    //     })
+    //     /* there may be no relationships */
+    //     relationships = relationships || [];
+    //     const rels  = relationships.map(function processRelationships() {
+    //       /* deal with props */
+    //       const {
+    //         requiredProps,
+    //         optionalProps,
+    //         privateProps,
+    //       } = this.decomposeProps(relObject.partnerNode.properties);
+    //     })
+    //     const enode = this.builder.makeEnhancedNode(
+    //       coreNode
+    //       [
+    //         ...relationships.map(function processRelationship(relObject) {
+    //           return this.builder.makeRelationshipCandidate(
+    //             relObject.labels,
+    //             this.builder.makeEnhancedNode(
+    //               this.builder.makeNode(
+    //                 relObject.partnerNode.labels,
+    //                 requiredProps,
+    //                 {
+    //                   ...optionalProps,
+    //                   ...privateProps,
+    //                 }
+    //               ),
+    //               [
+    //                 ...(relObject.partnerNode.relationships
+    //                   ? relObject.partnerNode.relationships.map(
+    //                       processRelationship
+    //                     )
+    //                   : []),
+    //               ]
+    //             )
+    //           );
+    //         }),
+    //       ]
+    //     );
+    //     return enode;
+    //   }
+    // );
+    // const results: Result[] = await this.engine.mergeEnhancedNodes(enodes);
+    // if (config.returnResult) return results;
+    // return results.map((result) => result.getData()[0]);
   }
+  // async buildAndMergeEnhancedNodes(
+  //   graphPatterns: SimplifiedEnhancedNode[],
+  //   config: Object = {}
+  // ): Promise<Result | EnhancedNode> {
+  //   const enodes = graphPatterns.map(
+  //     ({ labels, properties, relationships }) => {
+  //       const {
+  //         requiredProps,
+  //         optionalProps,
+  //         privateProps,
+  //       } = this.decomposeProps(properties);
+
+  //       /* there may be no relationships */
+  //       relationships = relationships || [];
+
+  //       const enode = this.builder.makeEnhancedNode(
+  //         this.builder.makeNode(labels, requiredProps, {
+  //           ...optionalProps,
+  //           ...privateProps,
+  //         }),
+
+  //         [
+  //           ...relationships.map(function processRelationship(relObject) {
+  //             const {
+  //               requiredProps,
+  //               optionalProps,
+  //               privateProps,
+  //             } = this.decomposeProps(relObject.partnerNode.properties);
+  //             return this.builder.makeRelationshipCandidate(
+  //               relObject.labels,
+  //               this.builder.makeEnhancedNode(
+  //                 this.builder.makeNode(
+  //                   relObject.partnerNode.labels,
+  //                   requiredProps,
+  //                   {
+  //                     ...optionalProps,
+  //                     ...privateProps,
+  //                   }
+  //                 ),
+  //                 [
+  //                   ...(relObject.partnerNode.relationships
+  //                     ? relObject.partnerNode.relationships.map(
+  //                         processRelationship
+  //                       )
+  //                     : []),
+  //                 ]
+  //               )
+  //               // this.builder.makeNode(
+  //               //   relObject.partnerNode.labels,
+  //               //   requiredProps,
+  //               //   {
+  //               //     ...optionalProps,
+  //               //     ...privateProps,
+  //               //   }
+  //               // )
+  //             );
+  //           }),
+  //         ]
+  //       );
+  //       return enode;
+  //     }
+  //   );
+  //   const results: Result[] = await this.engine.mergeEnhancedNodes(enodes);
+
+  //   if (config.returnResult) return results;
+
+  //   return results.map((result) => result.getData()[0]);
+  // }
 
   /**
    * Removes Node/EnhancedNode and all its Relationships from Neo4j.
