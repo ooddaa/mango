@@ -155,7 +155,7 @@ describe("clean DB", () => {
   test("example2 deep enodes", async () => {
     // Merge a pattern to Neo4j:
     // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
-    // (:TVSeries { NAME: "SpongeBob SquarePants" })-[:HAS_WIKIPAGE]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
+    // (:TVSeries { NAME: "SpongeBob SquarePants", YEAR: 1999 })-[:HAS_WIKIPAGE]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
     /// db setup
     await engine.cleanDB();
     /// !db setup
@@ -185,11 +185,12 @@ describe("clean DB", () => {
       {
         // (:TVSeries { NAME: "SpongeBob SquarePants" })
         labels: ["TVSeries"],
-        properties: { NAME: "SpongeBob SquarePants" },
+        properties: { NAME: "SpongeBob SquarePants", YEAR: 1999 },
         relationships: [
           {
             // -[:HAS_WIKIPAGE]->
             labels: ["HAS_WIKIPAGE"],
+            properties: { isTooLong: true },
             partnerNode: {
               // (:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
               labels: ["Webpage"],

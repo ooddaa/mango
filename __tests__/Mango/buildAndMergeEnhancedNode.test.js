@@ -123,30 +123,65 @@ describe("deep enode", () => {
     expect(product1.getParticipatingRelationships()).toHaveLength(5);
   });
 });
+describe("documentation examples", () => {
+  test("simple", async () => {
+    /* (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" }) */
+    /// db setup
+    await engine.cleanDB();
+    /// !db setup
+    let spongeBob: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+      labels: ["Person"],
+      properties: { NAME: "SpongeBob" },
+      relationships: [
+        {
+          labels: ["HAS_FRIEND"],
+          partnerNode: {
+            labels: ["Person"],
+            properties: { NAME: "Patrick" },
+          },
+        },
+      ],
+    });
+    expect(spongeBob).toBeInstanceOf(EnhancedNode);
+    expect(spongeBob.isWritten()).toEqual(true);
+    expect(spongeBob.getParticipatingRelationships()).toHaveLength(1);
+  });
+  test("complex", async () => {
+    /* (:City { NAME: "Bikini Bottom" })-[:LIVES_IN]->(:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })<-[:LIVES_IN]-(:City { NAME: "Bikini Bottom" }) */
+    /// db setup
+    await engine.cleanDB();
+    /// !db setup
 
-// describe("Node exists, no copies created", () => {
-//   test("return Node", async () => {
-//     /// db setup
-//     await engine.cleanDB();
+    let bikiniBottom = {
+      labels: ["City"],
+      properties: { NAME: "Bikini Bottom" },
+    };
+    let spongeBob: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+      labels: ["Person"],
+      properties: { NAME: "SpongeBob" },
+      relationships: [
+        {
+          labels: ["LIVES_IN"],
+          partnerNode: bikiniBottom,
+        },
+        {
+          labels: ["HAS_FRIEND"],
+          partnerNode: {
+            labels: ["Person"],
+            properties: { NAME: "Patrick" },
+            relationships: [
+              {
+                labels: ["LIVES_IN"],
+                partnerNode: bikiniBottom,
+              },
+            ],
+          },
+        },
+      ],
+    });
 
-//     const node = builder.makeNode(["Product"], {
-//       NAME: "Bedrocan",
-//     });
-//     const mergedNode = await engine.mergeNodes([node]);
-//     expect(mergedNode[0]).toBeInstanceOf(Success);
-
-//     let product1 /* : Node */ = await mango.buildAndMergeNode(["Product"], {
-//       NAME: "Bedrocan",
-//     });
-//     expect(product1).toMatchObject({
-//       labels: ["Product"],
-//       properties: {
-//         NAME: "Bedrocan",
-//       },
-//       ...dbProps,
-//     });
-
-//     /* ID is the same, ie no copies */
-//     expect(mergedNode[0].getData().getId()).toEqual(product1.getId());
-//   });
-// });
+    expect(spongeBob).toBeInstanceOf(EnhancedNode);
+    expect(spongeBob.isWritten()).toEqual(true);
+    expect(spongeBob.getParticipatingRelationships()).toHaveLength(3);
+  });
+});

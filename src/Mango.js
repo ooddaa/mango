@@ -652,11 +652,14 @@ class Mango {
    * @example
    *
    * import { isEnhancedNode, log } from 'mango';
+   * const mango = new Mango({
+   * // pass Neo4j credentials here
+   * })
    *
    * // Create the following pattern in Neo4j:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
    *
-   * let person: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+   * let spongeBob: EnhancedNode = await mango.buildAndMergeEnhancedNode({
    *  labels: ["Person"],
    *  properties: { NAME: "Sponge Bob" },
    *  relationships: [
@@ -667,8 +670,47 @@ class Mango {
    *  ],
    * });
    *
-   * log(isEnhancedNode(person)); // true
-   * log(person.isWritten());     // true <- pattern is written to Neo4j
+   * log(isEnhancedNode(spongeBob)); // true
+   * log(spongeBob.isWritten());     // true <- pattern is written to Neo4j
+   *
+   *
+   * // Patterns can be however deep.
+   * // (:City { NAME: "Bikini Bottom" })-[:LIVES_IN]->(:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })<-[:LIVES_IN]-(:City { NAME: "Bikini Bottom" })
+   *
+   * // Create the city, for convenience
+   * let bikiniBottom = {
+   *  labels: ["City"],
+   *  properties: { NAME: "Bikini Bottom" },
+   * };
+   *
+   * // Merge the pattern.
+   * let spongeBob: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+   *  labels: ["Person"],
+   *  properties: { NAME: "SpongeBob" },
+   *  relationships: [
+   *     {
+   *       labels: ["LIVES_IN"],
+   *       partnerNode: bikiniBottom,
+   *     },
+   *     {
+   *       labels: ["HAS_FRIEND"],
+   *       partnerNode: {
+   *         labels: ["Person"],
+   *         properties: { NAME: "Patrick" },
+   *         relationships: [
+   *           {
+   *             labels: ["LIVES_IN"],
+   *             partnerNode: bikiniBottom,
+   *           },
+   *         ],
+   *       },
+   *     },
+   *   ],
+   * });
+   *
+   * log(isEnhancedNode(spongeBob));  // true
+   * log(spongeBob.isWritten());      // true
+   * log(spongeBob.getParticipatingRelationships());      // 3 <- we merged 3 Relationships
    */
   async buildAndMergeEnhancedNode(
     { labels, properties, relationships }: SimplifiedEnhancedNode,
@@ -704,11 +746,17 @@ class Mango {
    * @example
    *
    * import { isEnhancedNode, log } from 'mango';
+   * const mango = new Mango({
+   * // pass Neo4j credentials here
+   * })
    *
    * // Create the following pattern in Neo4j:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
+   * // (:TVSeries { NAME: "SpongeBob SquarePants" })-[:HAS_WIKIPAGE]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
    *
-   * let person: EnhancedNode = await mango.buildAndMergeEnhancedNode({
+   * let [spongeBob, tvseries]: EnhancedNode = await mango.buildAndMergeEnhancedNodes([
+   * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
+   * {
    *  labels: ["Person"],
    *  properties: { NAME: "Sponge Bob" },
    *  relationships: [
@@ -717,10 +765,26 @@ class Mango {
    *      partnerNode: { labels: ["Person"], properties: { NAME: "Patrick" } },
    *    },
    *  ],
-   * });
+   * }
    *
-   * log(isEnhancedNode(person)); // true
-   * log(person.isWritten());     // true <- pattern is written to Neo4j
+   * // (:TVSeries { NAME: "SpongeBob SquarePants", YEAR: 1999 })-[:HAS_WIKIPAGE { isToLong: true }]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
+   * {
+   *  labels: ["TVSeries"],
+   *  properties: { NAME: "SpongeBob SquarePants", YEAR: 1999 },
+   *  relationships: [
+   *    {
+   *      labels: ["HAS_WIKIPAGE"],
+   *      properties: { isTooLong: true },
+   *      partnerNode: { labels: ["Webpage"], properties: { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" } },
+   *    },
+   *  ],
+   * }
+   * ]);
+   *
+   * log(isEnhancedNode(spongeBob));  // true
+   * log(spongeBob.isWritten());      // true <- pattern is written to Neo4j
+   * log(isEnhancedNode(tvseries));   // true
+   * log(tvseries.isWritten());       // true <- pattern is written to Neo4j
    */
   async buildAndMergeEnhancedNodes(
     graphPatterns: SimplifiedEnhancedNode[],
@@ -820,19 +884,6 @@ class Mango {
   static search(condition: string, value: any): ConditionContainer {
     return new ConditionContainer(condition, value);
   }
-
-  // /**
-  //  * A shortcut to create a search condition.
-  //  * A non-static version of static search.
-  //  *
-  //  * @public
-  //  * @param {string} condition - Condition for value search ( > < >= <= == etc. ).
-  //  * @param {any} value - Searched value.
-  //  * @returns {ConditionContainer}
-  //  */
-  // is(condition: string, value: any): ConditionContainer {
-  //   return this.search(condition, value);
-  // }
 
   /**
    * Helper method to classify a POJO's properties into REQUIRED/optional/_private types.
