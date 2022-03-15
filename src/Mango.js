@@ -23,58 +23,19 @@ import {
   getOptionalProperties,
   getPrivateProperties,
   stringify,
+  decomposeProps,
 } from "./utils";
 
 import { NoEngineError } from "./Errors";
 import type {
   SimplifiedRelationshipArray,
-  SimplifiedRelationshipObject,
+  SimplifiedRelationship,
   SimplifiedEnhancedNode,
 } from "./types";
 
 /**
- * Mango is a user-friendly Object-To-Graph Mapper build on top of Neo4j's official
+ * Mango is a user/developer-friendly Object-To-Graph Mapper build on top of Neo4j's official
  * JavaScript Driver.
- *
- * At this moment [2022-02-22] the version 1.0.1 is opinionated insofar as its main
- * purpose has been to help build Knowledge Graphs (aka KG). These KGs would be based on
- * preserving unique Entities (aka Nodes) and Relationships between Nodes.
- *
- * The key driving motive was to design a tool which would help ensure that there are no
- * copies of the same Node.
- *
- * The idea came up when I worked for a family office and was dealing with bits and pieces
- * of data coming across my desk. I noticed that I would spend most of my time and effort
- * not on the value-generating activities relating to the data, but on solving questions
- * like:
- *  - What is the correct full address of Person X?
- *  - Did we send that document to Y?
- *  - Where can I find Z?
- *
- * It was obvious that the solutions to these questions (99% of time that would be a
- * source document, or colleague's advice) resided within my colleague's minds or on their
- * desktops/emails.
- *
- * We did have an old and limited database that had some records of some legal entities
- * and natural persons - but to use that knowledge it had to be checked and double-checked
- * with colleagues first. Which in 50% of situations required them requesting the info from
- * their counterparties.
- *
- * The problem was that once all the effort was made and the relevant info was received,
- * verified and utilized, it was simply forgotten until the next time when same problem
- * arrived. And when it did, usually after a prolonged period of time, no one could easily
- * locate the previous result to reduce the amount of cognitive work.
- *
- * Simple solution was to agree to share all such hard-earned knowledge, but:
- *
- *  - There was no simple way to do it. We tried Confluence - but it required a learning
- *    curve that no one wanted. Everyone want to go on writing emails and making phone calls.
- *  - No one wants to archive. Archiving is a difficult mental work which is not rewarded
- *    in an obvious, immediate way. Therefore no one does it. This creates a huge (but
- *    familiar) tech debt in a form of knowledge search, repeating same work that already
- *    has been done. On the upside this is how office workers1.0 justify the time they spend
- *    in the office getting paid.
- *
  *
  * @class Main class for the user to operate.
  * @public
@@ -265,14 +226,17 @@ class Mango {
    * @returns {Promise<Result|Node[]>}
    * @example
    *
-   * const rv =
-   *  mango
-   *  .findNode(["Person"], { NAME: 'Bob' })
-   *  .then(nodes => {
-   *    console.log(nodes.length) // 2 <- we found 2 Nodes with NAME == 'Bob'
-   *    console.log(nodes[0].getProperty("fullName")) // Bob Dylan
-   *    console.log(nodes[1].getProperty("fullName")) // Bob Marley
-   *  })
+   * import { Mango, isEnhancedNode, log } from 'mango';
+   *
+   * const mango = new Mango({
+   *  // pass engineConfig with Neo4j credentials
+   * });
+   *
+   * const results: EnhancedNode[] = await mango.findNode(["Person"], { NAME: 'Bob' });
+   * log(results.every(isEnhancedNode));        // true
+   * log(results.length);                       // 2 <- we found 2 Nodes with NAME == 'Bob'
+   * log(results[0].getProperty("FULL_NAME"));  // Bob Dylan
+   * log(results[1].getProperty("FULL_NAME"));  // Bob Marley
    */
   async findNode(
     labels: string[],
@@ -356,11 +320,19 @@ class Mango {
    * @todo - allow opting out of Uniqueness Requirement.
    * @returns {Promise<Result|EnhancedNode>}
    * @example
-   * const node =
+   *
+   * import { Mango, isEnhancedNode, log } from 'mango';
+   *
+   * const mango = new Mango({
+   *  // pass engineConfig with Neo4j credentials
+   * });
+   *
+   * const result: EnhancedNode =
    *  await mango.buildAndMergeNode(["Product"], { NAME: "Sweet Mango" });
    *
-   *  console.log(node.isWritten());  // true <- Neo4j has a (Product { NAME: "Sweet Mango", _hash:str, _uuid:str, _date_created: TimeArray })
-   *  console.log(node.getId());      // 1 <- Neo4j's Id for this Node
+   * log(isEnhancedNode(result)); // true
+   * log(node.isWritten());       // true <- Neo4j has a (Product { NAME: "Sweet Mango", _hash:str, _uuid:str, _date_created: TimeArray })
+   * log(node.getId());           // 1 <- Neo4j's Id for this Node
    */
   async buildAndMergeNode(
     labels: string[],
@@ -399,7 +371,7 @@ class Mango {
    *
    * @public
    * @param {Node|EnhancedNode} startNode - Node that has an outbound Relationship.
-   * @param {SimplifiedRelationshipArray|SimplifiedRelationshipObject} relationship - [["REL_TYPES"], "required" | "optional", { relProps } ] | { labels: string[], properties: Object, necessity: "required" | "optional" }.
+   * @param {SimplifiedRelationshipArray|SimplifiedRelationship} relationship - [["REL_TYPES"], "required" | "optional", { relProps } ] | { labels: string[], properties: Object, necessity: "required" | "optional" }.
    * @param {Node|EnhancedNode} endNode - Node that has an inbound Relationship.
    * @param {Object} config - Configuration object.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
@@ -408,6 +380,12 @@ class Mango {
    *
    * @returns {Promise<Result|Relationship>}
    * @example
+   *
+   * import { Mango, isRelationship, log } from 'mango';
+   *
+   * const mango = new Mango({
+   *  // pass engineConfig with Neo4j credentials
+   * });
    *
    * // Find Nodes.
    * const bob = await mango.buildAndMergeNode(["Person"], {
@@ -422,7 +400,7 @@ class Mango {
    *  bob,
    *  {
    *    labels: ["IS_FRIENDS_WITH"],
-   *    properties: { since: "lazyDriver?: booleanforever" },
+   *    properties: { since: "forever" },
    *  }
    *  patrick
    * );
@@ -430,13 +408,13 @@ class Mango {
    *
    * // Check
    * // (:Person { FULL_NAME: "SpongeBob SquarePants" })-[:IS_FRIENDS_WITH { since: "forever" }]->(:Person { FULL_NAME: "Patrick Star" })
-   * // exists
-   * console.log(relationship.isWritten()) // true
+   * log(isRelationship(relationship)); // true
+   * log(relationship.isWritten());     // true
    *
    */
   async buildAndMergeRelationship(
     startNode: Node | EnhancedNode,
-    relationship: SimplifiedRelationshipArray | SimplifiedRelationshipObject,
+    relationship: SimplifiedRelationshipArray | SimplifiedRelationship,
     endNode: Node | EnhancedNode,
     config: Object = {}
   ): Promise<Result | Relationship> {
@@ -524,6 +502,16 @@ class Mango {
    * @returns {Promise<Result|EnhancedNode>}
    * @example
    *
+   * // This is a long way to do it.
+   * // A shorter is to use mango.buildAndMergeEnhancedNode method.
+   *
+   * import { Builder, Mango, isEnhancedNode, log } from 'mango';
+   *
+   * const builder = new Builder();
+   * const mango = new Mango({
+   *  // pass engineConfig with Neo4j credentials
+   * });
+   *
    * // Merge a pattern to Neo4j:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
    *
@@ -540,8 +528,9 @@ class Mango {
    *   ]
    * );
    *
-   * const enode: EnhancedNode = await mango.mergeEnhancedNode(person)
-   * console.log(enode.isWritten()); // true
+   * const enode: EnhancedNode = await mango.mergeEnhancedNode(person);
+   * log(isEnhancedNode(enode));  // true
+   * log(enode.isWritten());      // true
    */
   async mergeEnhancedNode(
     enode: EnhancedNode,
@@ -577,12 +566,12 @@ class Mango {
    * @returns {Promise<Result|EnhancedNode[]>}
    * @example
    *
-   * import { Builder, Mango } from 'mango';
+   * import { Builder, Mango, isEnhancedNode, log } from 'mango';
    *
    * const builder = new Builder();
    * const mango = new Mango({
-   * // pass Neo4j credentials here
-   * })
+   *  // pass engineConfig with Neo4j credentials
+   * });
    *
    * // Merge a pattern to Neo4j:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
@@ -611,9 +600,10 @@ class Mango {
    *    ]
    * )
    *
-   * const result: EnhancedNode[] = await mango.mergeEnhancedNodes([person, wiki]);
-   * console.log(result[0].isWritten()); // true
-   * console.log(result[1].isWritten()); // true
+   * const results: EnhancedNode[] = await mango.mergeEnhancedNodes([person, wiki]);
+   * log(results.every(isEnhancedNode));  // true
+   * log(results[0].isWritten());         // true
+   * log(results[1].isWritten());         // true
    */
   async mergeEnhancedNodes(
     enodes: EnhancedNode[],
@@ -658,12 +648,12 @@ class Mango {
    * @returns {Promise<Result|EnhancedNode>}
    * @example
    *
-   * import { isEnhancedNode, log } from 'mango';
+   * import { Mango, isEnhancedNode, log } from 'mango';
    * const mango = new Mango({
-   * // pass Neo4j credentials here
-   * })
+   *  // pass engineConfig with Neo4j credentials
+   * });
    *
-   * // Create the following pattern in Neo4j:
+   * // We want SpongeBob and Patrick to be friends:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
    *
    * let spongeBob: EnhancedNode = await mango.buildAndMergeEnhancedNode({
@@ -682,15 +672,13 @@ class Mango {
    *
    *
    * // Patterns can be however deep.
-   * // (:City { NAME: "Bikini Bottom" })-[:LIVES_IN]->(:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })<-[:LIVES_IN]-(:City { NAME: "Bikini Bottom" })
+   * // (:City { NAME: "Bikini Bottom" })<-[:LIVES_IN]-(:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })-[:LIVES_IN]->(:City { NAME: "Bikini Bottom" })
    *
-   * // Create the city, for convenience
    * let bikiniBottom = {
    *  labels: ["City"],
    *  properties: { NAME: "Bikini Bottom" },
    * };
    *
-   * // Merge the pattern.
    * let spongeBob: EnhancedNode = await mango.buildAndMergeEnhancedNode({
    *  labels: ["Person"],
    *  properties: { NAME: "SpongeBob" },
@@ -715,9 +703,9 @@ class Mango {
    *   ],
    * });
    *
-   * log(isEnhancedNode(spongeBob));  // true
-   * log(spongeBob.isWritten());      // true
-   * log(spongeBob.getParticipatingRelationships());      // 3 <- we merged 3 Relationships
+   * log(isEnhancedNode(spongeBob));                  // true
+   * log(spongeBob.isWritten());                      // true
+   * log(spongeBob.getParticipatingRelationships());  // 3 <- we merged 3 Relationships
    */
   async buildAndMergeEnhancedNode(
     { labels, properties, relationships }: SimplifiedEnhancedNode,
@@ -739,54 +727,60 @@ class Mango {
   }
 
   /**
-   * Builds and merges EnhancedNode (a subgraph) to Neo4j.
-   * Ensures that specified pattern exists in Neo4j.
-   * Allows a user-friendly declaration of a graph pattern that needs to be merged into Neo4j.
+   * Builds and batch merges multiple EnhancedNodes (aka subgraph) to Neo4j.
+   * Allows a user-friendly declaration of a graph pattern that will be merged into Neo4j.
    *
    * @public
-   * @param {SimplifiedEnhancedNode} graphPattern - a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
+   * @param {SimplifiedEnhancedNode[]} graphPattern - a graph pattern (aka EnhancedNodes) to be built and merged into Neo4j.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
    * {false} returns EnhancedNode.
    *
-   * @returns {Promise<Result|EnhancedNode>}
+   * @returns {Promise<Result|EnhancedNode[]>}
    * @example
    *
-   * import { isEnhancedNode, log } from 'mango';
+   * import { Mango, isEnhancedNode, log } from 'mango';
    * const mango = new Mango({
-   * // pass Neo4j credentials here
-   * })
+   *  // pass engineConfig with Neo4j credentials
+   * });
    *
    * // Create the following pattern in Neo4j:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
    * // (:TVSeries { NAME: "SpongeBob SquarePants" })-[:HAS_WIKIPAGE]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
    *
-   * let [spongeBob, tvseries]: EnhancedNode = await mango.buildAndMergeEnhancedNodes([
-   * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
-   * {
-   *  labels: ["Person"],
-   *  properties: { NAME: "Sponge Bob" },
-   *  relationships: [
-   *    {
-   *      labels: ["HAS_FRIEND"],
-   *      partnerNode: { labels: ["Person"], properties: { NAME: "Patrick" } },
-   *    },
-   *  ],
-   * }
+   * let [spongeBob, tvseries]: [EnhancedNode, EnhancedNode] =
+   *    await mango.buildAndMergeEnhancedNodes([
+   *      // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
+   *      {
+   *       labels: ["Person"],
+   *       properties: { NAME: "Sponge Bob" },
+   *       relationships: [
+   *         {
+   *           labels: ["HAS_FRIEND"],
+   *           partnerNode: { labels: ["Person"], properties: { NAME: "Patrick" } },
+   *         },
+   *       ],
+   *      }
    *
-   * // (:TVSeries { NAME: "SpongeBob SquarePants", YEAR: 1999 })-[:HAS_WIKIPAGE { isToLong: true }]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
-   * {
-   *  labels: ["TVSeries"],
-   *  properties: { NAME: "SpongeBob SquarePants", YEAR: 1999 },
-   *  relationships: [
-   *    {
-   *      labels: ["HAS_WIKIPAGE"],
-   *      properties: { isTooLong: true },
-   *      partnerNode: { labels: ["Webpage"], properties: { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" } },
-   *    },
-   *  ],
-   * }
-   * ]);
+   *      // (:TVSeries { NAME: "SpongeBob SquarePants" })-[:HAS_WIKIPAGE { isToLong: true }]
+   *      // ->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
+   *      {
+   *       labels: ["TVSeries"],
+   *       properties: { NAME: "SpongeBob SquarePants" },
+   *       relationships: [
+   *         {
+   *           labels: ["HAS_WIKIPAGE"],
+   *           properties: { isTooLong: true },
+   *           partnerNode: {
+   *             labels: ["Webpage"],
+   *             properties: {
+   *               URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants"
+   *             }
+   *           },
+   *         },
+   *       ],
+   *      }
+   *      ]);
    *
    * log(isEnhancedNode(spongeBob));  // true
    * log(spongeBob.isWritten());      // true <- pattern is written to Neo4j
@@ -826,29 +820,40 @@ class Mango {
    * @public
    * @param {Node|EnhancedNode} node - Node to delete.
    * @param {Object} config - Configuration object.
-   * @param {boolean} [config.archiveNodes=false] - {true} does not delete anything. Instead it sets { _isCurrent: false, _dateArchived: TimeArray } on Node & all its Relationships.
+   * @param {boolean} [config.archiveNodes=false] - {true} does not actually delete anything from Neo4j. Instead it sets { _isCurrent: false, _dateArchived: TimeArray } on Node & all its Relationships to signify that the Node has been archived and does not represent current state of domain knowledge.
    *
    * {false} permanently deletes Nodes and all its Relations.
    *
-   * @returns {Promise<Result>} - Returns Result where Result.data contains affected Node and its Relationships.
+   * @param {boolean} [config.returnResult=false] - {true} returns a Result.
+   *
+   * {false} return deleted EnhancedNode.
+   *
+   * @returns {Promise<Result|EnhancedNode>}
    * @example
    *
-   * const mango = new Mango({ engineConfig });
-   * const bob = await mango.findNode(["Person"], { fullName: 'SpongeBob SquarePants' });
-   * const rv =
-   *  mango
-   *  .deleteNode(bob)
-   *  .then(node => {
-   *    // node == EnhancedNode that specifies all Relationships that were affected
-   *    console.log(node.getProperty('_hasBeenDeleted')); // true
-   *    console.log(node.getProperty('_whenWasDeleted')); // [year, month, day, weekday, timestamp]
-   *    console.log(node.getProperty('_isArchived')); // false
-   *  })
+   * import { Mango, log } from 'mango';
+   * const mango = new Mango({
+   *  // pass engineConfig with Neo4j credentials
+   * });
+   *
+   * // mango.findNode returns EnhancedNode[], so we will grab the first result.
+   * const [bob]: EnhancedNode = await mango.findNode(["Person"], { FULL_NAME: 'SpongeBob SquarePants' });
+   *
+   * // result is an EnhancedNode that also specifies all Relationships that were affected.
+   * const result: EnhancedNode = await mango.deleteNode(bob);
+   *
+   * log(isEnhancedNode(result));                // true
+   * log(result.getProperty('_hasBeenDeleted')); // true
+   * log(result.getProperty('_whenWasDeleted')); // [year, month, day, weekday, timestamp]
+   * log(result.getProperty('_isArchived'));     // false
    */
   async deleteNode(
     node: Node | EnhancedNode,
-    config: Object = {}
-  ): Promise<Result> {
+    config: {
+      returnResult: boolean,
+      archiveNodes: boolean,
+    } = {}
+  ): Promise<Result | EnhancedNode> {
     /* validations */
     if (not(isNode(node)) || not(isEnhancedNode(node))) {
       throw new Error(
@@ -874,8 +879,13 @@ class Mango {
     Success.data = EnhancedNode
     */
       const rv = results[0];
-      rv.data = results[0].getData()[0];
-      return rv;
+      rv.data = results[0].getData();
+
+      if (config.returnResult) {
+        return rv;
+      }
+
+      return rv.getData()[0];
     }
   }
 
@@ -897,28 +907,39 @@ class Mango {
    * Used by Mango to create unique Nodes based on REQUIRED properties.
    *
    * @public
-   * @param {Object} props
-   * @returns {{ requiredProps: Object, optionalProps: Object, privateProps: Object }}
+   * @param {Object} props - Properties object to decompose.
+   * @param {Object} config - Configuration object.
+   * @param {boolean} [config.asArray=false] - Return array instead of object.
+   * @returns {{ requiredProps: Object, optionalProps: Object, privateProps: Object }|[requiredProps, optionalProps, privateProps]}
    * @example
    *
-   * const rv = new Mango().decomposeProps({
+   * import { Mango, isEnhancedNode, log } from 'mango';
+   *
+   * const mango = new Mango({
+   *  // pass engineConfig with Neo4j credentials
+   * });
+   *
+   * const props = {
    *  SOMETHINGIMPORTANT: 'foo',
    *  somethingOptional: 'bar',
    *  _andSomePrivateProp: 'kek'
-   *  });
-   * console.log(rv);
+   * }
+   *
+   * const rv = mango.decomposeProps(props);
+   * log(rv);
    * // {
    * //  requiredProps: { SOMETHINGIMPORTANT: 'foo' },
    * //  optionalProps: { somethingOptional: 'bar' },
    * //  privateProps: { _andSomePrivateProp: 'kek' },
    * // }
+   *
+   * const rv2 = mango.decomposeProps(props, { asArray: true });
+   *
+   * log(rv2);
+   * // [ { SOMETHINGIMPORTANT: 'foo' }, { somethingOptional: 'bar' }, { _andSomePrivateProp: 'kek' } ]
    */
-  decomposeProps(props: Object): Object {
-    return {
-      requiredProps: getRequiredProperties(props),
-      optionalProps: getOptionalProperties(props),
-      privateProps: getPrivateProperties(props),
-    };
+  decomposeProps(props: Object, config: Object): Object | Object[] {
+    return decomposeProps(props, config);
   }
 }
 
