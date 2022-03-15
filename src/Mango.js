@@ -577,6 +577,13 @@ class Mango {
    * @returns {Promise<Result|EnhancedNode[]>}
    * @example
    *
+   * import { Builder, Mango } from 'mango';
+   *
+   * const builder = new Builder();
+   * const mango = new Mango({
+   * // pass Neo4j credentials here
+   * })
+   *
    * // Merge a pattern to Neo4j:
    * // (:Person { NAME: "SpongeBob" })-[:HAS_FRIEND]->(:Person { NAME: "Patrick" })
    * // (:TVSeries { NAME: "SpongeBob SquarePants" })-[:HAS_WIKIPAGE]->(:Webpage { URL: "https://en.wikipedia.org/wiki/SpongeBob_SquarePants" })
