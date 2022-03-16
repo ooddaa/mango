@@ -1,5 +1,5 @@
 {
-  "name": "@oda/mango",
+  "name": "@ooddaa/mango",
   "version": "1.0.4",
   "public": true,
   "main": "./lib/index.js",
