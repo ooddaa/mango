@@ -1,0 +1,1982 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <title>manggo 1.0.4 | Documentation</title>
+  <meta name='description' content='Object-to-Graph Mapping tool for Node.js and Neo4j'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <link href='assets/bass.css' rel='stylesheet'>
+  <link href='assets/style.css' rel='stylesheet'>
+  <link href='assets/github.css' rel='stylesheet'>
+  <link href='assets/split.css' rel='stylesheet'>
+</head>
+<body class='documentation m0'>
+    <div class='flex'>
+      <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
+        <div class='py1 px2'>
+          <h3 class='mb0 no-anchor'>manggo</h3>
+          <div class='mb1'><code>1.0.4</code></div>
+          <input
+            placeholder='Filter'
+            id='filter-input'
+            class='col12 block input'
+            spellcheck='false'
+            autocapitalize='off'
+            autocorrect='off'
+            type='text' />
+          <div id='toc'>
+            <ul class='list-reset h5 py1-ul'>
+              
+                
+                <li><a
+                  href='#mango'
+                  class=" toggle-sibling">
+                  Mango
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  <ul class='list-reset py1-ul pl1'>
+                    <li class='h5'><span>Static members</span></li>
+                    
+                      <li><a
+                        href='#mangosearch'
+                        class='regular pre-open'>
+                        .search
+                      </a></li>
+                    
+                    </ul>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#mangofindnode'
+                        class='regular pre-open'>
+                        #findNode
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangobuildandmergenode'
+                        class='regular pre-open'>
+                        #buildAndMergeNode
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangobuildandmergerelationship'
+                        class='regular pre-open'>
+                        #buildAndMergeRelationship
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangomergeenhancednode'
+                        class='regular pre-open'>
+                        #mergeEnhancedNode
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangomergeenhancednodes'
+                        class='regular pre-open'>
+                        #mergeEnhancedNodes
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangobuildandmergeenhancednode'
+                        class='regular pre-open'>
+                        #buildAndMergeEnhancedNode
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangobuildandmergeenhancednodes'
+                        class='regular pre-open'>
+                        #buildAndMergeEnhancedNodes
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangodeletenode'
+                        class='regular pre-open'>
+                        #deleteNode
+                      </a></li>
+                      
+                      <li><a
+                        href='#mangodecomposeprops'
+                        class='regular pre-open'>
+                        #decomposeProps
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#conditioncontainer'
+                  class=" toggle-sibling">
+                  ConditionContainer
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#conditioncontainergettype'
+                        class='regular pre-open'>
+                        #getType
+                      </a></li>
+                      
+                      <li><a
+                        href='#conditioncontainertoobject'
+                        class='regular pre-open'>
+                        #toObject
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+            </ul>
+          </div>
+          <div class='mt1 h6 quiet'>
+            <a href='https://documentation.js.org/reading-documentation.html'>Need help reading this?</a>
+          </div>
+        </div>
+      </div>
+      <div id='split-right' class='relative overflow-auto height-viewport-100'>
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='mango'>
+      Mango
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Mango is a user/developer-friendly Object-To-Graph Mapper build on top of Neo4j's official
+JavaScript Driver.</p>
+
+    <div class='pre p1 fill-light mt0'>Mango</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.engine</span> <code class='quiet'>Engine</code>
+  </td>
+  <td class='break-word'><span>Instance of an Engine class. If none is supplied, Mango will look for config.engineConfig. If that does not exist or is unusable, a NoEngineError will be thrown.
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.engineConfig</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+  </td>
+  <td class='break-word'><span>Configuration object to instantiate connection to Neo4j.
+</span></td>
+</tr>
+
+  
+    <tr>
+  <td class='break-word'><span class='code bold'>config.engineConfig.username</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+  </td>
+  <td class='break-word'><span>Neo4j DBMS username.
+</span></td>
+</tr>
+
+
+  
+    <tr>
+  <td class='break-word'><span class='code bold'>config.engineConfig.password</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+  </td>
+  <td class='break-word'><span>Neo4j DBMS password.
+</span></td>
+</tr>
+
+
+  
+    <tr>
+  <td class='break-word'><span class='code bold'>config.engineConfig.ip</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+  
+    (default <code>&#39;0.0.0.0&#39;</code>)
+  </td>
+  <td class='break-word'><span>Neo4j DBMS IP to connect to.
+</span></td>
+</tr>
+
+
+  
+    <tr>
+  <td class='break-word'><span class='code bold'>config.engineConfig.port</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+  
+    (default <code>&#39;7687&#39;</code>)
+  </td>
+  <td class='break-word'><span>Neo4j DBMS port to use
+</span></td>
+</tr>
+
+
+  
+    <tr>
+  <td class='break-word'><span class='code bold'>config.engineConfig.database</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+  
+    (default <code>&#39;neo4j&#39;</code>)
+  </td>
+  <td class='break-word'><span>Neo4j DBMS database name to use.
+</span></td>
+</tr>
+
+
+  
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.builder</span> <code class='quiet'>Builder?</code>
+  
+    (default <code>newBuilder()</code>)
+  </td>
+  <td class='break-word'><span>Instance of a Builder class. If none is supplied, a generic one will be instantiated for you.
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Related</div>
+    
+      
+        module:Builder
+
+      
+    
+      
+        module:Engine
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-attr">engineConfig</span>: {
+   <span class="hljs-attr">username</span>: <span class="hljs-string">&#x27;neo4j&#x27;</span>,
+   <span class="hljs-attr">password</span>: <span class="hljs-string">&#x27;neo4jpass&#x27;</span>,
+ }
+}); <span class="hljs-comment">// connects to Neo4j DBMS instance running on 0.0.0.0:7687 and uses &#x27;neo4j&#x27; database</span></pre>
+    
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Static Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='mangosearch'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>search(condition, value)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>A shortcut to create a search condition.</p>
+
+    <div class='pre p1 fill-light mt0'>search(condition: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, value: any): <a href="#conditioncontainer">ConditionContainer</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>condition</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    Condition for value search ( > &#x3C; >= &#x3C;= == etc. ).
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>value</span> <code class='quiet'>(any)</code>
+	    Searched value.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#conditioncontainer">ConditionContainer</a></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='mangofindnode'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>findNode(labels, props, config)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Main method to search for data in Neo4j.</p>
+
+    <div class='pre p1 fill-light mt0'>findNode(labels: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>, props: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a>>)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>labels</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>)</code>
+	    Array of labels to match Nodes by.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>props</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    A POJO containing key:value to search for matches.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.exactMatch</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} Mango searches for exactly what we specified, ie the returned Nodes must not have any extra properties above supplied labels &#x26; properties. You get exactly what you asked for.
+<p>{false} Mango matches any Nodes that have supplied labels and properties and the returned result may contain Nodes with extra properties. You may get more than you asked for.</p>
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.returnResult</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} returns a Result with additional Neo4j query data.
+<p>{false} return Node[].</p>
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a>>)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Mango, isEnhancedNode, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-keyword">const</span> results: EnhancedNode[] = <span class="hljs-keyword">await</span> mango.findNode([<span class="hljs-string">&quot;Person&quot;</span>], { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&#x27;Bob&#x27;</span> });
+log(results.every(isEnhancedNode));        <span class="hljs-comment">// true</span>
+log(results.length);                       <span class="hljs-comment">// 2 &lt;- we found 2 Nodes with NAME == &#x27;Bob&#x27;</span>
+log(results[<span class="hljs-number">0</span>].getProperty(<span class="hljs-string">&quot;FULL_NAME&quot;</span>));  <span class="hljs-comment">// Bob Dylan</span>
+log(results[<span class="hljs-number">1</span>].getProperty(<span class="hljs-string">&quot;FULL_NAME&quot;</span>));  <span class="hljs-comment">// Bob Marley</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangobuildandmergenode'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>buildAndMergeNode(labels, props, config)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Builds a Node and merges it into Neo4j.</p>
+
+    <div class='pre p1 fill-light mt0'>buildAndMergeNode(labels: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>, props: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>labels</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>)</code>
+	    Array of labels to match Nodes by.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>props</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    A POJO with properties to construct and merge a Node to Neo4j. !MUST contain at least one label and a REQUIRED property to be unique (Uniqueness Requirement).
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.returnResult</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} returns a Result with additional Neo4j query data.
+<p>{false} returns EnhancedNode.</p>
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Mango, isEnhancedNode, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-keyword">const</span> result: EnhancedNode =
+ <span class="hljs-keyword">await</span> mango.buildAndMergeNode([<span class="hljs-string">&quot;Product&quot;</span>], { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Sweet Mango&quot;</span> });
+
+log(isEnhancedNode(result)); <span class="hljs-comment">// true</span>
+log(node.isWritten());       <span class="hljs-comment">// true &lt;- Neo4j has a (Product { NAME: &quot;Sweet Mango&quot;, _hash:str, _uuid:str, _date_created: TimeArray })</span>
+log(node.getId());           <span class="hljs-comment">// 1 &lt;- Neo4j&#x27;s Id for this Node</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangobuildandmergerelationship'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>buildAndMergeRelationship(startNode, relationship, endNode, config)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Builds a Relationship and merges it to Neo4j.
+Needs no direction, as it is set by the position of startNode &#x26; endNode.
+Namely, (startNode)-[:RELATIONSHIP]->(endNode).</p>
+
+    <div class='pre p1 fill-light mt0'>buildAndMergeRelationship(startNode: (<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a> | EnhancedNode), relationship: (SimplifiedRelationshipArray | SimplifiedRelationship), endNode: (<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a> | EnhancedNode), config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | Relationship)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>startNode</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a> | EnhancedNode))</code>
+	    Node that has an outbound Relationship.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>relationship</span> <code class='quiet'>((SimplifiedRelationshipArray | SimplifiedRelationship))</code>
+	    [["REL_TYPES"], "required" | "optional", { relProps } ] | { labels: string[], properties: Object, necessity: "required" | "optional" }.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>endNode</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a> | EnhancedNode))</code>
+	    Node that has an inbound Relationship.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.returnResult</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} returns a Result with additional Neo4j query data.
+<p>{false} returns Relationship.</p>
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | Relationship)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Mango, isRelationship, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-comment">// Find Nodes.</span>
+<span class="hljs-keyword">const</span> bob = <span class="hljs-keyword">await</span> mango.buildAndMergeNode([<span class="hljs-string">&quot;Person&quot;</span>], {
+ <span class="hljs-attr">FULL_NAME</span>: <span class="hljs-string">&quot;SpongeBob SquarePants&quot;</span>,
+});
+<span class="hljs-keyword">const</span> patrick = <span class="hljs-keyword">await</span> mango.buildAndMergeNode([<span class="hljs-string">&quot;Person&quot;</span>], {
+ <span class="hljs-attr">FULL_NAME</span>: <span class="hljs-string">&quot;Patrick Star&quot;</span>,
+});
+
+<span class="hljs-comment">// Build a beautiful friendship!</span>
+<span class="hljs-keyword">const</span> relationship = <span class="hljs-keyword">await</span> mango.buildAndMergeRelationship(
+ bob,
+ {
+   <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;IS_FRIENDS_WITH&quot;</span>],
+   <span class="hljs-attr">properties</span>: { <span class="hljs-attr">since</span>: <span class="hljs-string">&quot;forever&quot;</span> },
+ }
+ patrick
+);
+
+
+<span class="hljs-comment">// Check</span>
+<span class="hljs-comment">// (:Person { FULL_NAME: &quot;SpongeBob SquarePants&quot; })-[:IS_FRIENDS_WITH { since: &quot;forever&quot; }]-&gt;(:Person { FULL_NAME: &quot;Patrick Star&quot; })</span>
+log(isRelationship(relationship)); <span class="hljs-comment">// true</span>
+log(relationship.isWritten());     <span class="hljs-comment">// true</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangomergeenhancednode'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>mergeEnhancedNode(enode, config)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Merges EnhancedNode into Neo4j.
+Separates the building of Nodes/Relationships from their merging stage. You have to build EnhancedNodes
+with new Builder().buildEnhancedNodes first and then merge with this method.</p>
+
+    <div class='pre p1 fill-light mt0'>mergeEnhancedNode(enode: EnhancedNode, config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>enode</span> <code class='quiet'>(EnhancedNode)</code>
+	    EnhancedNode to merge into Neo4j.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.returnResult</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} returns a Result with additional Neo4j query data.
+<p>{false} returns EnhancedNode.</p>
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// This is a long way to do it.</span>
+<span class="hljs-comment">// A shorter is to use mango.buildAndMergeEnhancedNode method.</span>
+
+<span class="hljs-keyword">import</span> { Builder, Mango, isEnhancedNode, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+
+<span class="hljs-keyword">const</span> builder = <span class="hljs-keyword">new</span> Builder();
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-comment">// Merge a pattern to Neo4j:</span>
+<span class="hljs-comment">// (:Person { NAME: &quot;SpongeBob&quot; })-[:HAS_FRIEND]-&gt;(:Person { NAME: &quot;Patrick&quot; })</span>
+
+<span class="hljs-keyword">const</span> person: EnhancedNode = builder.makeEnhancedNode(
+  <span class="hljs-comment">// specify core, or &quot;start&quot;, node</span>
+  builder.makeNode([<span class="hljs-string">&quot;Person&quot;</span>], { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;SpongeBob&quot;</span> }),
+  <span class="hljs-comment">// specify relationships</span>
+  [
+    builder.makeRelationshipCandidate(
+      [<span class="hljs-string">&quot;HAS_FRIEND&quot;</span>],
+      <span class="hljs-comment">// specify the endNode</span>
+      builder.makeNode([<span class="hljs-string">&quot;Person&quot;</span>], { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Patrick&quot;</span> })
+    ),
+  ]
+);
+
+<span class="hljs-keyword">const</span> enode: EnhancedNode = <span class="hljs-keyword">await</span> mango.mergeEnhancedNode(person);
+log(isEnhancedNode(enode));  <span class="hljs-comment">// true</span>
+log(enode.isWritten());      <span class="hljs-comment">// true</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangomergeenhancednodes'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>mergeEnhancedNodes(enodes, config)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Merges EnhancedNodes into Neo4j.
+A batch variant of Mango.mergeEnhancedNode.</p>
+
+    <div class='pre p1 fill-light mt0'>mergeEnhancedNodes(enodes: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;EnhancedNode>, config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;EnhancedNode>)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>enodes</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;EnhancedNode>)</code>
+	    EnhancedNode[] to merge into Neo4j.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.returnResult</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} returns a Result with additional Neo4j query data.
+<p>{false} returns EnhancedNode[].</p>
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;EnhancedNode>)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Builder, Mango, isEnhancedNode, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+
+<span class="hljs-keyword">const</span> builder = <span class="hljs-keyword">new</span> Builder();
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-comment">// Merge a pattern to Neo4j:</span>
+<span class="hljs-comment">// (:Person { NAME: &quot;SpongeBob&quot; })-[:HAS_FRIEND]-&gt;(:Person { NAME: &quot;Patrick&quot; })</span>
+<span class="hljs-comment">// (:TVSeries { NAME: &quot;SpongeBob SquarePants&quot; })-[:HAS_WIKIPAGE]-&gt;(:Webpage { URL: &quot;https://en.wikipedia.org/wiki/SpongeBob_SquarePants&quot; })</span>
+
+<span class="hljs-keyword">const</span> person: EnhancedNode = builder.makeEnhancedNode(
+  <span class="hljs-comment">// specify core, or &quot;start&quot;, node</span>
+  builder.makeNode([<span class="hljs-string">&quot;Person&quot;</span>], { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;SpongeBob&quot;</span> }),
+  <span class="hljs-comment">// specify relationships</span>
+  [
+    builder.makeRelationshipCandidate(
+      [<span class="hljs-string">&quot;HAS_FRIEND&quot;</span>],
+      <span class="hljs-comment">// specify the endNode</span>
+      builder.makeNode([<span class="hljs-string">&quot;Person&quot;</span>], { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Patrick&quot;</span> })
+    ),
+  ]
+);
+
+<span class="hljs-keyword">const</span> wiki: EnhancedNode = builder.makeEnhancedNode(
+   builder.makeNode([<span class="hljs-string">&quot;TVSeries&quot;</span>], { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;SpongeBob SquarePants&quot;</span> }),
+   [
+     builder.makeRelationshipCandidate(
+       [<span class="hljs-string">&quot;HAS_WIKIPAGE&quot;</span>],
+       builder.makeNode([<span class="hljs-string">&quot;Webpage&quot;</span>], { <span class="hljs-attr">URL</span>: <span class="hljs-string">&quot;https://en.wikipedia.org/wiki/SpongeBob_SquarePants&quot;</span> })
+    ),
+   ]
+)
+
+<span class="hljs-keyword">const</span> results: EnhancedNode[] = <span class="hljs-keyword">await</span> mango.mergeEnhancedNodes([person, wiki]);
+log(results.every(isEnhancedNode));  <span class="hljs-comment">// true</span>
+log(results[<span class="hljs-number">0</span>].isWritten());         <span class="hljs-comment">// true</span>
+log(results[<span class="hljs-number">1</span>].isWritten());         <span class="hljs-comment">// true</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangobuildandmergeenhancednode'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>buildAndMergeEnhancedNode($0, config, graphPattern)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Builds and merges EnhancedNode (a subgraph) to Neo4j.
+Ensures that specified pattern exists in Neo4j.
+Allows a user-friendly declaration of a graph pattern that needs to be merged into Neo4j.</p>
+
+    <div class='pre p1 fill-light mt0'>buildAndMergeEnhancedNode($0: SimplifiedEnhancedNode, config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, graphPattern: SimplifiedEnhancedNode): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>$0</span> <code class='quiet'>(SimplifiedEnhancedNode)</code>
+	    
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>$0.labels</span> <code class='quiet'>any</code>
+  </td>
+  <td class='break-word'><span></span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>$0.properties</span> <code class='quiet'>any</code>
+  </td>
+  <td class='break-word'><span></span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>$0.relationships</span> <code class='quiet'>any</code>
+  </td>
+  <td class='break-word'><span></span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>graphPattern</span> <code class='quiet'>(SimplifiedEnhancedNode)</code>
+	    a graph pattern (aka EnhancedNode) to be built and merged into Neo4j.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Mango, isEnhancedNode, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-comment">// We want SpongeBob and Patrick to be friends:</span>
+<span class="hljs-comment">// (:Person { NAME: &quot;SpongeBob&quot; })-[:HAS_FRIEND]-&gt;(:Person { NAME: &quot;Patrick&quot; })</span>
+
+<span class="hljs-keyword">let</span> spongeBob: EnhancedNode = <span class="hljs-keyword">await</span> mango.buildAndMergeEnhancedNode({
+ <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;Person&quot;</span>],
+ <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Sponge Bob&quot;</span> },
+ <span class="hljs-attr">relationships</span>: [
+   {
+     <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;HAS_FRIEND&quot;</span>],
+     <span class="hljs-attr">partnerNode</span>: { <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;Person&quot;</span>], <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Patrick&quot;</span> } },
+   },
+ ],
+});
+
+log(isEnhancedNode(spongeBob)); <span class="hljs-comment">// true</span>
+log(spongeBob.isWritten());     <span class="hljs-comment">// true &lt;- pattern is written to Neo4j</span>
+
+
+<span class="hljs-comment">// Patterns can be however deep.</span>
+<span class="hljs-comment">// (:City { NAME: &quot;Bikini Bottom&quot; })&lt;-[:LIVES_IN]-(:Person { NAME: &quot;SpongeBob&quot; })-[:HAS_FRIEND]-&gt;(:Person { NAME: &quot;Patrick&quot; })-[:LIVES_IN]-&gt;(:City { NAME: &quot;Bikini Bottom&quot; })</span>
+
+<span class="hljs-keyword">let</span> bikiniBottom = {
+ <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;City&quot;</span>],
+ <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Bikini Bottom&quot;</span> },
+};
+
+<span class="hljs-keyword">let</span> spongeBob: EnhancedNode = <span class="hljs-keyword">await</span> mango.buildAndMergeEnhancedNode({
+ <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;Person&quot;</span>],
+ <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;SpongeBob&quot;</span> },
+ <span class="hljs-attr">relationships</span>: [
+    {
+      <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;LIVES_IN&quot;</span>],
+      <span class="hljs-attr">partnerNode</span>: bikiniBottom,
+    },
+    {
+      <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;HAS_FRIEND&quot;</span>],
+      <span class="hljs-attr">partnerNode</span>: {
+        <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;Person&quot;</span>],
+        <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Patrick&quot;</span> },
+        <span class="hljs-attr">relationships</span>: [
+          {
+            <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;LIVES_IN&quot;</span>],
+            <span class="hljs-attr">partnerNode</span>: bikiniBottom,
+          },
+        ],
+      },
+    },
+  ],
+});
+
+log(isEnhancedNode(spongeBob));                  <span class="hljs-comment">// true</span>
+log(spongeBob.isWritten());                      <span class="hljs-comment">// true</span>
+log(spongeBob.getParticipatingRelationships());  <span class="hljs-comment">// 3 &lt;- we merged 3 Relationships</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangobuildandmergeenhancednodes'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>buildAndMergeEnhancedNodes(graphPatterns, config, graphPattern)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Builds and batch merges multiple EnhancedNodes (aka subgraph) to Neo4j.
+Allows a user-friendly declaration of a graph pattern that will be merged into Neo4j.</p>
+
+    <div class='pre p1 fill-light mt0'>buildAndMergeEnhancedNodes(graphPatterns: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;SimplifiedEnhancedNode>, config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, graphPattern: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;SimplifiedEnhancedNode>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;EnhancedNode>)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>graphPatterns</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;SimplifiedEnhancedNode>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>graphPattern</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;SimplifiedEnhancedNode>)</code>
+	    a graph pattern (aka EnhancedNodes) to be built and merged into Neo4j.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;EnhancedNode>)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Mango, isEnhancedNode, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-comment">// Create the following pattern in Neo4j:</span>
+<span class="hljs-comment">// (:Person { NAME: &quot;SpongeBob&quot; })-[:HAS_FRIEND]-&gt;(:Person { NAME: &quot;Patrick&quot; })</span>
+<span class="hljs-comment">// (:TVSeries { NAME: &quot;SpongeBob SquarePants&quot; })-[:HAS_WIKIPAGE]-&gt;(:Webpage { URL: &quot;https://en.wikipedia.org/wiki/SpongeBob_SquarePants&quot; })</span>
+
+<span class="hljs-keyword">let</span> [spongeBob, tvseries]: [EnhancedNode, EnhancedNode] =
+   <span class="hljs-keyword">await</span> mango.buildAndMergeEnhancedNodes([
+     <span class="hljs-comment">// (:Person { NAME: &quot;SpongeBob&quot; })-[:HAS_FRIEND]-&gt;(:Person { NAME: &quot;Patrick&quot; })</span>
+     {
+      <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;Person&quot;</span>],
+      <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Sponge Bob&quot;</span> },
+      <span class="hljs-attr">relationships</span>: [
+        {
+          <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;HAS_FRIEND&quot;</span>],
+          <span class="hljs-attr">partnerNode</span>: { <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;Person&quot;</span>], <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;Patrick&quot;</span> } },
+        },
+      ],
+     }
+
+     <span class="hljs-comment">// (:TVSeries { NAME: &quot;SpongeBob SquarePants&quot; })-[:HAS_WIKIPAGE { isToLong: true }]</span>
+     <span class="hljs-comment">// -&gt;(:Webpage { URL: &quot;https://en.wikipedia.org/wiki/SpongeBob_SquarePants&quot; })</span>
+     {
+      <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;TVSeries&quot;</span>],
+      <span class="hljs-attr">properties</span>: { <span class="hljs-attr">NAME</span>: <span class="hljs-string">&quot;SpongeBob SquarePants&quot;</span> },
+      <span class="hljs-attr">relationships</span>: [
+        {
+          <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;HAS_WIKIPAGE&quot;</span>],
+          <span class="hljs-attr">properties</span>: { <span class="hljs-attr">isTooLong</span>: <span class="hljs-literal">true</span> },
+          <span class="hljs-attr">partnerNode</span>: {
+            <span class="hljs-attr">labels</span>: [<span class="hljs-string">&quot;Webpage&quot;</span>],
+            <span class="hljs-attr">properties</span>: {
+              <span class="hljs-attr">URL</span>: <span class="hljs-string">&quot;https://en.wikipedia.org/wiki/SpongeBob_SquarePants&quot;</span>
+            }
+          },
+        },
+      ],
+     }
+     ]);
+
+log(isEnhancedNode(spongeBob));  <span class="hljs-comment">// true</span>
+log(spongeBob.isWritten());      <span class="hljs-comment">// true &lt;- pattern is written to Neo4j</span>
+log(isEnhancedNode(tvseries));   <span class="hljs-comment">// true</span>
+log(tvseries.isWritten());       <span class="hljs-comment">// true &lt;- pattern is written to Neo4j</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangodeletenode'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>deleteNode(node, config)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Removes Node/EnhancedNode and all its Relationships from Neo4j.</p>
+
+    <div class='pre p1 fill-light mt0'>deleteNode(node: (<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a> | EnhancedNode), config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>node</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/API/Node/nextSibling">Node</a> | EnhancedNode))</code>
+	    Node to delete.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.archiveNodes</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} does not actually delete anything from Neo4j. Instead it sets { _isCurrent: false, _dateArchived: TimeArray } on Node &#x26; all its Relationships to signify that the Node has been archived and does not represent current state of domain knowledge.
+<p>{false} permanently deletes Nodes and all its Relations.</p>
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.returnResult</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>{true} returns a Result.
+<p>{false} return deleted EnhancedNode.</p>
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;(Result | EnhancedNode)></code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Mango, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-comment">// mango.findNode returns EnhancedNode[], so we will grab the first result.</span>
+<span class="hljs-keyword">const</span> [bob]: EnhancedNode = <span class="hljs-keyword">await</span> mango.findNode([<span class="hljs-string">&quot;Person&quot;</span>], { <span class="hljs-attr">FULL_NAME</span>: <span class="hljs-string">&#x27;SpongeBob SquarePants&#x27;</span> });
+
+<span class="hljs-comment">// result is an EnhancedNode that also specifies all Relationships that were affected.</span>
+<span class="hljs-keyword">const</span> result: EnhancedNode = <span class="hljs-keyword">await</span> mango.deleteNode(bob);
+
+log(isEnhancedNode(result));                <span class="hljs-comment">// true</span>
+log(result.getProperty(<span class="hljs-string">&#x27;_hasBeenDeleted&#x27;</span>)); <span class="hljs-comment">// true</span>
+log(result.getProperty(<span class="hljs-string">&#x27;_whenWasDeleted&#x27;</span>)); <span class="hljs-comment">// [year, month, day, weekday, timestamp]</span>
+log(result.getProperty(<span class="hljs-string">&#x27;_isArchived&#x27;</span>));     <span class="hljs-comment">// false</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='mangodecomposeprops'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>decomposeProps(props, config)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Helper method to classify a POJO's properties into REQUIRED/optional/_private types.
+Used by Mango to create unique Nodes based on REQUIRED properties.</p>
+
+    <div class='pre p1 fill-light mt0'>decomposeProps(props: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, config: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): ({requiredProps: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, optionalProps: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, privateProps: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>} | [requiredProps, optionalProps, privateProps])</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>props</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    Properties object to decompose.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>config</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    Configuration object.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>config.asArray</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>false</code>)
+  </td>
+  <td class='break-word'><span>Return array instead of object.
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>({requiredProps: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, optionalProps: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, privateProps: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>} | [requiredProps, optionalProps, privateProps])</code>:
+        
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { Mango, isEnhancedNode, log } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mango&#x27;</span>;
+
+<span class="hljs-keyword">const</span> mango = <span class="hljs-keyword">new</span> Mango({
+ <span class="hljs-comment">// pass engineConfig with Neo4j credentials</span>
+});
+
+<span class="hljs-keyword">const</span> props = {
+ <span class="hljs-attr">SOMETHINGIMPORTANT</span>: <span class="hljs-string">&#x27;foo&#x27;</span>,
+ <span class="hljs-attr">somethingOptional</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+ <span class="hljs-attr">_andSomePrivateProp</span>: <span class="hljs-string">&#x27;kek&#x27;</span>
+}
+
+<span class="hljs-keyword">const</span> rv = mango.decomposeProps(props);
+log(rv);
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//  requiredProps: { SOMETHINGIMPORTANT: &#x27;foo&#x27; },</span>
+<span class="hljs-comment">//  optionalProps: { somethingOptional: &#x27;bar&#x27; },</span>
+<span class="hljs-comment">//  privateProps: { _andSomePrivateProp: &#x27;kek&#x27; },</span>
+<span class="hljs-comment">// }</span>
+
+<span class="hljs-keyword">const</span> rv2 = mango.decomposeProps(props, { <span class="hljs-attr">asArray</span>: <span class="hljs-literal">true</span> });
+
+log(rv2);
+<span class="hljs-comment">// [ { SOMETHINGIMPORTANT: &#x27;foo&#x27; }, { somethingOptional: &#x27;bar&#x27; }, { _andSomePrivateProp: &#x27;kek&#x27; } ]</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='conditioncontainer'>
+      ConditionContainer
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Represents a searched value and its search condition.</p>
+
+    <div class='pre p1 fill-light mt0'>new ConditionContainer(condition: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, value: any)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>condition</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    Condition for value search ( > &#x3C; >= &#x3C;= == etc. ).
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>value</span> <code class='quiet'>(any)</code>
+	    Searched value.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='conditioncontainergettype'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getType()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Helper method to check value's type.</p>
+
+    <div class='pre p1 fill-light mt0'>getType(): any</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>any</code>:
+        value type
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='conditioncontainertoobject'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>toObject()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Helper method to unwrap value.</p>
+
+    <div class='pre p1 fill-light mt0'>toObject(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        { condition: value }.
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+      </div>
+    </div>
+  <script src='assets/anchor.js'></script>
+  <script src='assets/split.js'></script>
+  <script src='assets/site.js'></script>
+</body>
+</html>

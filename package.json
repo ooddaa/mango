@@ -1,6 +1,6 @@
 {
-  "name": "manggo",
-  "version": "1.0.3",
+  "name": "@oda/mango",
+  "version": "1.0.4",
   "public": true,
   "main": "./lib/index.js",
   "description": "Object-to-Graph Mapping tool for Node.js and Neo4j",
