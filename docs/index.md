@@ -137,13 +137,13 @@ Returns **[Promise][41]<(Result | EnhancedNode)>**
 ### buildAndMergeRelationship
 
 Builds a Relationship and merges it to Neo4j.
-Needs no direction, as it is set by the position of startNode & endNode.
-Namely, (startNode)-\[:RELATIONSHIP]->(endNode).
+Direction is optional. If not specified, it is set by the position of startNode & endNode:
+(startNode)-\[:RELATIONSHIP]->(endNode).
 
 #### Parameters
 
 *   `startNode` **([Node][42] | EnhancedNode)** Node that has an outbound Relationship.
-*   `relationship` **(SimplifiedRelationshipArray | SimplifiedRelationship)** \[\["REL_TYPES"], "required" | "optional", { relProps } ] | { labels: string\[], properties: Object, necessity: "required" | "optional" }.
+*   `relationship` **(SimplifiedRelationship | SimplifiedRelationshipArray)** See SimplifiedRelationship and SimplifiedRelationshipArray
 *   `endNode` **([Node][42] | EnhancedNode)** Node that has an inbound Relationship.
 *   `config` **[Object][37]** Configuration object. (optional, default `{}`)
 

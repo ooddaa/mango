@@ -366,12 +366,12 @@ class Mango {
 
   /**
    * Builds a Relationship and merges it to Neo4j.
-   * Needs no direction, as it is set by the position of startNode & endNode.
-   * Namely, (startNode)-[:RELATIONSHIP]->(endNode).
+   * Direction is optional. If not specified, it is set by the position of startNode & endNode:
+   * (startNode)-[:RELATIONSHIP]->(endNode).
    *
    * @public
    * @param {Node|EnhancedNode} startNode - Node that has an outbound Relationship.
-   * @param {SimplifiedRelationshipArray|SimplifiedRelationship} relationship - [["REL_TYPES"], "required" | "optional", { relProps } ] | { labels: string[], properties: Object, necessity: "required" | "optional" }.
+   * @param {SimplifiedRelationship|SimplifiedRelationshipArray} relationship - See SimplifiedRelationship and SimplifiedRelationshipArray
    * @param {Node|EnhancedNode} endNode - Node that has an inbound Relationship.
    * @param {Object} config - Configuration object.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
