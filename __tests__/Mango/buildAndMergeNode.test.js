@@ -67,7 +67,7 @@ describe("clean DB", () => {
 });
 
 describe("Node exists, no copies created", () => {
-  test("return Node", async () => {
+  test("one label", async () => {
     /// db setup
     await engine.cleanDB();
 
@@ -91,7 +91,7 @@ describe("Node exists, no copies created", () => {
     /* ID is the same, ie no copies */
     expect(mergedNode[0].getData().getId()).toEqual(product1.getId());
   });
-  test("return Node", async () => {
+  test("multiple labels", async () => {
     /// db setup
     await engine.cleanDB();
 

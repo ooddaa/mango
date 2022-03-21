@@ -105,6 +105,7 @@ describe("validations", () => {
     expect(isEnhancedNode(result[0].getData())).toEqual(true);
   });
 });
+
 describe("use cases", () => {
   const candidates = [
     new NodeCandidate({
@@ -360,7 +361,7 @@ describe("use cases", () => {
         new NodeCandidate({
           labels,
           properties: {
-            required: { B: "b1" },
+            requqired: { B: "b1" },
           },
         }),
       ],
@@ -372,7 +373,7 @@ describe("use cases", () => {
     expect(rv[0]).toBeInstanceOf(Success);
     const enode = rv[0].getData();
     expect(enode).toBeInstanceOf(EnhancedNode);
-    expect(enode.getLabels()).toEqual(labels);
+    expect(enode.getLabels()).toEqual([labels[0]]);
     expect(enode.getProperty("_labels")).toEqual(labels);
   });
 });

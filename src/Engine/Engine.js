@@ -1421,7 +1421,7 @@ class Engine {
 
           /* check if _hash is present and match by it */
           if (has(node.properties, ["_hash"])) {
-            const query = `OPTIONAL MATCH (x${node.toString("labels")}{_hash:'${
+            const query = `OPTIONAL MATCH (x${node.toString({ parameter: "labels"})}{_hash:'${
               node.properties._hash
             }'}) RETURN x`;
             return { query, originalNode: node };
