@@ -506,7 +506,23 @@ describe("Node has multiple labels", () => {
 });
 
 describe("Node hashing", () => {
-  test("1", () => {
+  const labels = ["Person", "Sponge"];
+  const node = new Node({
+    labels,
+    properties: { NAME: "Bob", optional: 'smthOptional', _private: '_smthPrivate' },
+  });
 
+  test("node.setHash uses firstLabelOnly & requiredPropsOnly", () => {
+    node.setHash()
+    const rv = node.getHash()
+    const str = node.toString({ 
+      firstLabelOnly: true, 
+      requiredPropsOnly: true, 
+    })
+    expect(str).toEqual(":Person {NAME: 'Bob'}")
+    const hash = node.hasher(str)
+
+    expect(rv).toEqual(hash)
+    expect(hash).toEqual('dde30053df8d66f781bdd77f58921e4222658db1e17509499e5728379e91269f')
   })
 })

@@ -181,16 +181,40 @@ function setHash(): void {
   /* in case we don't have any required properties, we'll hash by first label only */
   if (!keys(props).length) {
     /* USE ONLY FIRST LABEL FOR HASH! */
-    const hash = this.createHash(JSON.stringify(this.getLabels()[0]));
+    const hash = this.createHash(
+      this.toString({ 
+        parameter: "labels", 
+        firstLabelOnly: true 
+      })
+    );
     this.properties._hash = hash
     return
   }
   /* hmm something somewhere will break =) hello, bug! */
 
   this.properties._hash = this.createHash(
-    `${this.getLabels()[0] || ""}${this.toString({ parameter: "all", requiredPropsOnly: true })}`
+    this.toString({ 
+      parameter: "all", 
+      requiredPropsOnly: true, 
+      firstLabelOnly: true 
+    })
   );
 }
+// function setHash(): void {
+//   const props = this.getRequiredProperties();
+//   /* in case we don't have any required properties, we'll hash by first label only */
+//   if (!keys(props).length) {
+//     /* USE ONLY FIRST LABEL FOR HASH! */
+//     const hash = this.createHash(JSON.stringify(this.getLabels()[0]));
+//     this.properties._hash = hash
+//     return
+//   }
+//   /* hmm something somewhere will break =) hello, bug! */
+
+//   this.properties._hash = this.createHash(
+//     `${this.getLabels()[0] || ""}${this.toString({ parameter: "all", requiredPropsOnly: true })}`
+//   );
+// }
 Node.prototype.setHash = setHash
 
 function setLabels(val): Node {
