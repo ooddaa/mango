@@ -7,21 +7,21 @@ import { Node, isNode, log } from "../../../src";
 describe("Testing Node.toString()", () => {
   test("Node.toString() no label, no property", () => {
     const node = new Node();
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = ``;
     expect(result).toEqual(expected);
   });
 
   test("Node.toString() one label", () => {
     const node = new Node({ labels: ["Country"] });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:Country`;
     expect(result).toEqual(expected);
   });
 
   test("Node.toString() one label one property", () => {
     const node = new Node({ labels: ["Country"], properties: { name: "UK" } });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:Country {name: 'UK'}`;
     expect(result).toEqual(expected);
   });
@@ -37,7 +37,7 @@ describe("Testing Node.toString()", () => {
         to_date: "now",
       },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:Person {name: 'Jon', surname: 'Doe', nickname: 'lm', from_date: '01/01/2000', to_date: 'now'}`;
     expect(result).toEqual(expected);
   });
@@ -54,7 +54,7 @@ describe("Testing Node.toString()", () => {
         link: "xxx",
       },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:PowerOfAttorney {name: 'poa_1', duration: 3, from_date: '13/09/2017', to_date: '13/09/2020', apostille: true, link: 'xxx'}`;
     expect(result).toEqual(expected);
   });
@@ -71,7 +71,7 @@ describe("Testing Node.toString()", () => {
         link: "xxx",
       },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:PowerOfAttorney {name: 'poa_1', duration: 3, from_date: '13/09/2017', to_date: '13/09/2020', apostille: true, link: 'xxx'}`;
     expect(result).toEqual(expected);
   });
@@ -81,7 +81,7 @@ describe("Testing Node.toString()", () => {
       labels: ["Transaction"],
       properties: { date: [2018, 8, 27] },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:Transaction {date: [2018, 8, 27]}`;
     expect(result).toEqual(expected);
   });
@@ -91,7 +91,7 @@ describe("Testing Node.toString()", () => {
       labels: ["Transaction"],
       properties: { date: [2018, 8, 27, 1] },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:Transaction {date: [2018, 8, 27, 1]}`;
     expect(result).toEqual(expected);
   });
@@ -107,7 +107,7 @@ describe("Testing Node.toString()", () => {
         to_date: "now",
       },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = ` {name: 'Jon', surname: 'Doe', nickname: 'lm', from_date: '01/01/2000', to_date: 'now'}`;
     expect(result).toEqual(expected);
   });
@@ -123,7 +123,7 @@ describe("Testing Node.toString()", () => {
         to_date: "now",
       },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = ` {name: 'Jon', surname: 'Doe', nickname: 'lm', from_date: '01/01/2000', to_date: 'now'}`;
     expect(result).toEqual(expected);
   });
@@ -139,7 +139,7 @@ describe("Testing Node.toString()", () => {
         to_date: "now",
       },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:Person {name: 'Jon', surname: 'Doe', nickname: 'lm', from_date: '01/01/2000', to_date: 'now'}`;
     expect(result).toEqual(expected);
   });
@@ -155,7 +155,7 @@ describe("Testing Node.toString()", () => {
         to_date: "now",
       },
     });
-    const result = node.toString("no hash");
+    const result = node.toString({ parameter: "no hash" });
     const expected = `:Person:Director:Signatory {NAME: 'Lol', SURNAME: 'Haha', nickname: 'boo', from_date: '11/12/2012', to_date: 'now'}`;
     expect(result).toEqual(expected);
   });
@@ -171,7 +171,7 @@ describe("Testing Node.toString()", () => {
     expect(result).toEqual(expected);
   });
 
-  test("Node may have a property which value is [string, number], must return string[]", () => {
+  test("Node may have a property which value is [string, number], must return string[] 1", () => {
     const node = new Node({
       labels: ["Person"],
       properties: { ABC: ["a", 2] },
@@ -181,18 +181,18 @@ describe("Testing Node.toString()", () => {
     expect(result).toEqual(expected);
   });
 
-  test("Node may have a property which value is [string, number], must return string[]", () => {
+  test("Node may have a property which value is [string, number], must return string[] 2", () => {
     const node = new Node({
       labels: ["Person"],
       properties: { ABC: ["a", 2] },
     });
-    const result = node.toString("properties");
+    const result = node.toString({ parameter: "properties" });
     const expected = `{ABC: ['a', '2']}`;
     expect(result).toEqual(expected);
   });
 });
 
-describe('toString("all", parameterObject)', () => {
+describe('toString(config)', () => {
   const node = new Node({
     labels: ["Person"],
     properties: {
@@ -206,33 +206,37 @@ describe('toString("all", parameterObject)', () => {
   });
   // no hash const hash = `_hash: '0f1a3629d6f8330931f73432e734586e784c3dcd89f8085ddc9be2144f8e5071'`
 
-  test("toString() will stringify all labels + props", () => {
+  test("toString() will stringify all labels + all props", () => {
     const result = node.toString();
     expect(result).toEqual(
       `:Person {NAME: 'Jon', SURNAME: 'Doe', toys: 'cars', food: ['beer', 'meat'], _uuid: '123abc'}`
     );
   });
-  test("toString(`all`) will stringify all labels + props", () => {
-    const result = node.toString(`all`);
+
+  test("toString({ parameter: `all` }) will stringify all labels + all props", () => {
+    const result = node.toString({ parameter: `all` });
     expect(result).toEqual(
       `:Person {NAME: 'Jon', SURNAME: 'Doe', toys: 'cars', food: ['beer', 'meat'], _uuid: '123abc'}`
     );
   });
-  test("toString(`all`, {REQUIRED: true}) will stringify labels + only REQUIRED props", () => {
-    const result = node.toString(`all`, { REQUIRED: true });
+
+  test("toString({ parameter:`all`, requiredPropsOnly: true }) will stringify labels + only REQUIRED props", () => {
+    const result = node.toString({ parameter:`all`, requiredPropsOnly: true });
     expect(result).toEqual(`:Person {NAME: 'Jon', SURNAME: 'Doe'}`);
   });
-  test("toString(`all`, {optional: true}) will stringify labels + only optional props", () => {
-    const result = node.toString(`all`, { optional: true });
+
+  test("toString({ parameter: `all`, optionalPropsOnly: true }) will stringify labels + only optional props", () => {
+    const result = node.toString({ parameter: `all`, optionalPropsOnly: true });
     expect(result).toEqual(`:Person {toys: 'cars', food: ['beer', 'meat']}`);
   });
-  test("toString(`all`, {_private: true}) will stringify only _private props", () => {
-    const result = node.toString(`all`, { _private: true });
+
+  test("toString({ parameter: `all`, _privatePropsOnly: true }) will stringify only _private props", () => {
+    const result = node.toString({ parameter: `all`, _privatePropsOnly: true });
     expect(result).toEqual(`:Person {_uuid: '123abc'}`);
   });
 });
 
-describe('toString("properties", parameter)', () => {
+describe('toString({ parameter: "properties" })', () => {
   const node = new Node({
     labels: ["Person"],
     properties: {
@@ -246,24 +250,28 @@ describe('toString("properties", parameter)', () => {
   });
   // const hash = `_hash: '0f1a3629d6f8330931f73432e734586e784c3dcd89f8085ddc9be2144f8e5071'`
 
-  test("toString(`properties`) will stringify all props only, no labels", () => {
-    const result = node.toString(`properties`);
+  test("toString({ parameter: `properties` }) will stringify all props only, no labels", () => {
+    const result = node.toString({ parameter: `properties` });
     expect(result).toEqual(
       `{NAME: 'Jon', SURNAME: 'Doe', toys: 'cars', food: ['beer', 'meat'], _uuid: '123abc'}`
     );
   });
-  test("toString(`properties`, {REQUIRED: true}) will stringify only REQUIRED props", () => {
-    const result = node.toString(`properties`, { REQUIRED: true });
+
+  test("toString({ parameter: `properties`, requiredPropsOnly: true }) will stringify only REQUIRED props", () => {
+    const result = node.toString({ parameter: `properties`, requiredPropsOnly: true });
     expect(result).toEqual(`{NAME: 'Jon', SURNAME: 'Doe'}`);
   });
-  test("toString(`properties`, {optional: true}) will stringify only optional props", () => {
-    const result = node.toString(`properties`, { optional: true });
+
+  test("toString({ parameter: `properties`, optionalPropsOnly: true }) will stringify only optional props", () => {
+    const result = node.toString({ parameter: `properties`, optionalPropsOnly: true });
     expect(result).toEqual(`{toys: 'cars', food: ['beer', 'meat']}`);
   });
-  test("toString(`properties`, {_private: true}) will stringify only _private props", () => {
-    const result = node.toString(`properties`, { _private: true });
+
+  test("toString({ parameter: `properties`, _privatePropsOnly: true }) will stringify only _private props", () => {
+    const result = node.toString({ parameter: `properties`, _privatePropsOnly: true });
     expect(result).toEqual(`{_uuid: '123abc'}`);
   });
+
   test("engine use case", () => {
     /* 
         MERGE (x:Person {NAME: 'Jon', SURNAME: 'Doe'}) 
@@ -272,11 +280,11 @@ describe('toString("properties", parameter)', () => {
         RETURN *
         */
     const query = `MERGE (x:Person {NAME: 'Jon', SURNAME: 'Doe'}) ON MATCH SET x = {NAME: 'Jon', SURNAME: 'Doe', toys: 'cars', food: ['beer', 'meat'], _uuid: '123abc'} ON CREATE SET x = {NAME: 'Jon', SURNAME: 'Doe', toys: 'cars', food: ['beer', 'meat'], _uuid: '123abc'} RETURN *`;
-    const result = `MERGE (x${node.toString("all", {
-      REQUIRED: true,
-    })}) ON MATCH SET x = ${node.toString(
-      "properties"
-    )} ON CREATE SET x = ${node.toString("properties")} RETURN *`;
+    const result = `MERGE (x${node.toString({ parameter: "all",
+      requiredPropsOnly: true,
+    })}) ON MATCH SET x = ${node.toString({ parameter: "properties"}
+      
+    )} ON CREATE SET x = ${node.toString({ parameter: "properties"})} RETURN *`;
     expect(result).toEqual(query);
   });
 });
@@ -287,16 +295,17 @@ describe("Testing labels stringification", () => {
       labels: ["Person"],
       properties: { abc: ["a", 2] },
     });
-    const result = node.toString("labels");
+    const result = node.toString({ parameter: "labels" });
     const expected = `:Person`;
     expect(result).toEqual(expected);
   });
+
   test("Stringify Labels only to build relationships 1+", () => {
     const node = new Node({
       labels: ["Jose", "Raul", "Capablanca", "y", "Graupera"],
       properties: { abc: ["a", 2] },
     });
-    const result = node.toString("labels");
+    const result = node.toString({parameter: "labels"});
     const expected = `:Jose:Raul:Capablanca:Y:Graupera`;
     expect(result).toEqual(expected);
   });
@@ -313,6 +322,7 @@ describe("Testing Node methods", () => {
     const expected = 186;
     expect(result).toEqual(expected);
   });
+
   test("Node.toObject() returns object", () => {
     const node = new Node({
       labels: ["Person"],
@@ -326,6 +336,7 @@ describe("Testing Node methods", () => {
       properties: { name: "Jon", surname: "Doe" },
     });
   });
+
   test("Node.getRequiredProperties() returns object with required props", () => {
     /* all REQUIRED properties are UpperCased */
     const node = new Node({
@@ -342,6 +353,7 @@ describe("Testing Node methods", () => {
     const result = node.getRequiredProperties();
     expect(result).toMatchObject({ NAME: "Jon", SURNAME: "Doe", SEX: "Male" });
   });
+
   test("Node.getOptionalProperties() returns object with required props", () => {
     /* all optional properties are LowerCased */
     const node = new Node({
@@ -358,6 +370,7 @@ describe("Testing Node methods", () => {
     const result = node.getOptionalProperties();
     expect(result).toMatchObject({ toys: "cars" });
   });
+
   test("Node.getPrivateProperties() returns object with private props", () => {
     /* all optional properties are LowerCased */
     const node = new Node({
@@ -374,6 +387,7 @@ describe("Testing Node methods", () => {
     const result = node.getPrivateProperties();
     expect(result).toMatchObject({ _uuid: "123abc" });
   });
+
   describe("Node.getProperties()", () => {
     test("Node.getProperties() returns object with required props", () => {
       /* all optional properties are LowerCased */
@@ -397,6 +411,7 @@ describe("Testing Node methods", () => {
         _uuid: "123abc",
       });
     });
+
     test("Node.getProperties(`number`) returns object with all numerical values as numbers", () => {
       const node = new Node({
         labels: ["Person"],
@@ -427,6 +442,7 @@ describe("Testing Node methods", () => {
         _date: [2018, 8, 27, 1, 123],
       });
     });
+
     test("Node.getProperty(propName: string) - gets the named property or undefined", () => {
       const node = new Node({
         labels: ["Person"],
@@ -465,16 +481,32 @@ describe("Node has multiple labels", () => {
   const labels = ["Person", "Sponge"];
   const node = new Node({
     labels,
-    properties: { NAME: "Bob" },
+    properties: { NAME: "Bob", optional: 'smthOptional', _private: '_smthPrivate' },
   });
 
   test("two labels", () => {
     expect(node.getLabels()).toEqual(labels);
   });
-  test("multiple labels stringify correctly to Cypher", () => {
-    expect(node.toString("labels")).toEqual(":Person:Sponge");
+
+  test("toString({ parameter: 'labels' }) stringify correctly to Cypher", () => {
+    expect(node.toString({ parameter: "labels" })).toEqual(":Person:Sponge");
   });
+
+  test("toString({ parameter: 'labels', firstLabelOnly: true }) will stringify only first label to Cypher", () => {
+    expect(node.toString({ parameter: "labels", firstLabelOnly: true })).toEqual(":Person");
+  });
+
+  test("toString({ parameter: 'all', firstLabelOnly: true })", () => {
+    expect(node.toString({ parameter: 'all', firstLabelOnly: true })).toEqual(":Person {NAME: 'Bob', optional: 'smthOptional', _private: '_smthPrivate'}");
+  });
+
   test("everything works as expected", () => {
-    expect(node.toString()).toEqual(":Person:Sponge {NAME: 'Bob'}");
+    expect(node.toString()).toEqual(":Person:Sponge {NAME: 'Bob', optional: 'smthOptional', _private: '_smthPrivate'}");
   });
 });
+
+describe("Node hashing", () => {
+  test("1", () => {
+
+  })
+})

@@ -147,13 +147,20 @@ function getProperty(prop: string): any {
 }
 Node.prototype.getProperty = getProperty
 
+function hasher(data: string): string {
+  const hash = crypto.createHash("sha256");
+  hash.update(data);
+  const result = hash.digest("hex");
+  return result;
+}
+Node.prototype.hasher = hasher
+
 /**
  * @to_be_depricated as useless - use this.hasher instead
  * @param {*} data_to_hash 
  */
-function createHash(data_to_hash): String {
-  // const data_to_hash = this.toString('all', { REQUIRED: true })
-  const hash = this.hasher(data_to_hash);
+function createHash(data): String {
+  const hash = this.hasher(data);
   return hash;
 }
 Node.prototype.createHash = createHash
@@ -181,7 +188,7 @@ function setHash(): void {
   /* hmm something somewhere will break =) hello, bug! */
 
   this.properties._hash = this.createHash(
-    `${this.getLabels()[0] || ""}${this.toString("all", { REQUIRED: true })}`
+    `${this.getLabels()[0] || ""}${this.toString({ parameter: "all", requiredPropsOnly: true })}`
   );
 }
 Node.prototype.setHash = setHash
@@ -224,31 +231,45 @@ Node.prototype.setIdentity = setIdentity
  * @returns 
  */
 function toString(
-  parameter: string = "all",
-  { REQUIRED, required, optional, _private } = {}
+  config: { 
+    parameter: "all"|"labels"|"properties"|"no hash",
+    firstLabelOnly: boolean, 
+    required: boolean, 
+    requiredPropsOnly: boolean,
+    optional: boolean, 
+    optionalPropsOnly: boolean,
+    _private: boolean,
+    _privatePropsOnly: boolean
+  } = {}
 ): string {
+  let parameter = config.parameter || "all"
+  let firstLabelOnly = config.firstLabelOnly || false;
+  let required = config.required || config.requiredPropsOnly || false;
+  let optional = config.optional || config.optionalPropsOnly || false;
+  let _private = config._private || config._privatePropsOnly || false;
+  
   if (parameter === "labels") {
-    return `${this.stringifyLabel(this.labels)}`;
+    return `${this.stringifyLabel(firstLabelOnly ? this.getLabels()[0] : this.getLabels())}`;
   }
   if (parameter === "all") {
-    if (REQUIRED || required)
-      return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+    if (required)
+      return `${this.stringifyLabel(firstLabelOnly ? this.getLabels()[0] : this.getLabels())}${this.stringifyProperties(
         this.getRequiredProperties()
       )}`;
     if (optional)
-      return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+      return `${this.stringifyLabel(firstLabelOnly ? this.getLabels()[0] : this.getLabels())}${this.stringifyProperties(
         this.getOptionalProperties()
       )}`;
     if (_private)
-      return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+      return `${this.stringifyLabel(firstLabelOnly ? this.getLabels()[0] : this.getLabels())}${this.stringifyProperties(
         this.getPrivateProperties()
       )}`;
-    return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+    return `${this.stringifyLabel(firstLabelOnly ? this.getLabels()[0] : this.getLabels())}${this.stringifyProperties(
       this.properties
     )}`;
   }
   if (parameter === "properties") {
-    if (REQUIRED || required)
+    if (required)
       return `${this.stringifyProperties(
         this.getRequiredProperties()
       )}`.slice(1);
@@ -264,14 +285,76 @@ function toString(
   }
   if (parameter === "no hash") {
     const { _hash, ...rest } = this.properties;
-    return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+    return `${this.stringifyLabel(firstLabelOnly ? this.getLabels()[0] : this.getLabels())}${this.stringifyProperties(
       rest
     )}`;
   }
-  return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+  return `${this.stringifyLabel(firstLabelOnly ? this.getLabels()[0] : this.getLabels())}${this.stringifyProperties(
     this.properties
   )}`;
 }
+// // function toString(
+//   //   parameter: string = "all",
+//   //   { REQUIRED, required, optional, _private } = {}
+//   // ): string {
+// function toString(
+//   config: { 
+//     firstLabelOnly: boolean, 
+//     required: boolean, 
+//     optional: boolean, 
+//     _private: boolean 
+//   } = {}
+// ): string {
+//   let firstLabelOnly = config.firstLabelOnly || false;
+//   let required = config.required || true;
+//   let optional = config.optional || false;
+//   let _private = config._private || false;
+  
+//   if (parameter === "labels") {
+//     return `${this.stringifyLabel(this.labels)}`;
+//   }
+//   if (parameter === "all") {
+//     if (REQUIRED || required)
+//       return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+//         this.getRequiredProperties()
+//       )}`;
+//     if (optional)
+//       return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+//         this.getOptionalProperties()
+//       )}`;
+//     if (_private)
+//       return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+//         this.getPrivateProperties()
+//       )}`;
+//     return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+//       this.properties
+//     )}`;
+//   }
+//   if (parameter === "properties") {
+//     if (REQUIRED || required)
+//       return `${this.stringifyProperties(
+//         this.getRequiredProperties()
+//       )}`.slice(1);
+//     if (optional)
+//       return `${this.stringifyProperties(
+//         this.getOptionalProperties()
+//       )}`.slice(1);
+//     if (_private)
+//       return `${this.stringifyProperties(this.getPrivateProperties())}`.slice(
+//         1
+//       );
+//     return `${this.stringifyProperties(this.properties)}`.slice(1);
+//   }
+//   if (parameter === "no hash") {
+//     const { _hash, ...rest } = this.properties;
+//     return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+//       rest
+//     )}`;
+//   }
+//   return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
+//     this.properties
+//   )}`;
+// }
 Node.prototype.toString = toString
 
 function toObject(): Object {
@@ -416,14 +499,6 @@ function convertIntegerToNumber(object: Integer): number | Integer {
   return object;
 }
 Node.prototype.convertIntegerToNumber = convertIntegerToNumber
-
-function hasher(data: string): string {
-  const hash = crypto.createHash("sha256");
-  hash.update(data);
-  const result = hash.digest("hex");
-  return result;
-}
-Node.prototype.hasher = hasher
 
 /**
  * Checks if Node has _hash, which is interpreted as this Node having passed Validator

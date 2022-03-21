@@ -4,4 +4,4 @@
         b.  All default values == undefined.
 
 [2022-03-20][1.0.3] 
-    1. 
+    1. only the first label is used to compose Node's _hash. 
