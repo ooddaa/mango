@@ -62,7 +62,7 @@ describe("clean DB", () => {
     });
     // log(rv);
     expect(rv).toBeInstanceOf(EnhancedNode);
-    expect(rv.getLabels()).toEqual(labels);
+    expect(rv.getLabels()).toEqual([labels[0]]);
   });
 });
 
@@ -90,5 +90,32 @@ describe("Node exists, no copies created", () => {
 
     /* ID is the same, ie no copies */
     expect(mergedNode[0].getData().getId()).toEqual(product1.getId());
+  });
+  test("return Node", async () => {
+    /// db setup
+    await engine.cleanDB();
+
+    const node = builder.makeNode(["Product"], {
+      NAME: "Bedrocan",
+    });
+    const mergedNode = await engine.mergeNodes([node]);
+    expect(mergedNode[0]).toBeInstanceOf(Success);
+
+    let rv: EnhancedNode = await mango.buildAndMergeNode(["Product", "SomethingElse"], {
+      NAME: "Bedrocan",
+    });
+    
+    expect(rv).toMatchObject({
+      labels: ["Product"],
+      properties: {
+        NAME: "Bedrocan",
+        _label: 'Product',
+        _labels: ['Product', "SomethingElse"],
+      },
+      ...dbProps,
+    });
+
+    /* ID is the same, ie no copies */
+    expect(mergedNode[0].getData().getId()).toEqual(rv.getId());
   });
 });

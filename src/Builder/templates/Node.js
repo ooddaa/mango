@@ -171,18 +171,17 @@ Node.prototype.getHash = getHash
  */
 function setHash(): void {
   const props = this.getRequiredProperties();
-  // in case we don't have any required properties, we'll hash by labels only
+  /* in case we don't have any required properties, we'll hash by first label only */
   if (!keys(props).length) {
-    const hash = this.createHash(JSON.stringify(this.getLabels()));
+    /* USE ONLY FIRST LABEL FOR HASH! */
+    const hash = this.createHash(JSON.stringify(this.getLabels()[0]));
     this.properties._hash = hash
     return
   }
-  // hmm something somewhere will break =) hello, bug!
-  // if (!keys(props).length) {
-  //   return;
-  // }
+  /* hmm something somewhere will break =) hello, bug! */
+
   this.properties._hash = this.createHash(
-    this.toString("all", { REQUIRED: true })
+    `${this.getLabels()[0] || ""}${this.toString("all", { REQUIRED: true })}`
   );
 }
 Node.prototype.setHash = setHash
@@ -218,6 +217,12 @@ function setIdentity(val): Node {
 }
 Node.prototype.setIdentity = setIdentity
 
+/**
+ * Only first label is used for stringification. 
+ * @param {*} parameter 
+ * @param {*} param1 
+ * @returns 
+ */
 function toString(
   parameter: string = "all",
   { REQUIRED, required, optional, _private } = {}
@@ -227,18 +232,18 @@ function toString(
   }
   if (parameter === "all") {
     if (REQUIRED || required)
-      return `${this.stringifyLabel(this.labels)}${this.stringifyProperties(
+      return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
         this.getRequiredProperties()
       )}`;
     if (optional)
-      return `${this.stringifyLabel(this.labels)}${this.stringifyProperties(
+      return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
         this.getOptionalProperties()
       )}`;
     if (_private)
-      return `${this.stringifyLabel(this.labels)}${this.stringifyProperties(
+      return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
         this.getPrivateProperties()
       )}`;
-    return `${this.stringifyLabel(this.labels)}${this.stringifyProperties(
+    return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
       this.properties
     )}`;
   }
@@ -259,11 +264,11 @@ function toString(
   }
   if (parameter === "no hash") {
     const { _hash, ...rest } = this.properties;
-    return `${this.stringifyLabel(this.labels)}${this.stringifyProperties(
+    return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
       rest
     )}`;
   }
-  return `${this.stringifyLabel(this.labels)}${this.stringifyProperties(
+  return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
     this.properties
   )}`;
 }

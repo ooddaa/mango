@@ -691,10 +691,11 @@ class Engine {
       parameters = {
         nodes: map[labels].map((node) => node.getProperties()),
       };
-
+      /**@TODO ON MATCH update optional properties  */
       query = `
       UNWIND $nodes as node
       MERGE (x:${labels} {_hash: node._hash})
+      ON MATCH SET x._labels = node._labels
       ON CREATE SET x = node
       WITH x
       CALL apoc.create.uuids(1) YIELD uuid
@@ -769,6 +770,21 @@ class Engine {
     if (extract) return result.map(getResultData);
 
     return result;
+
+    /* INNER FUNCTIONS
+    _________________________________________________________________*/
+    function toMapByLabel(arr: (PartialNode | Node | EnhancedNode)[]): Object {
+      return arr.reduce((acc, node) => {
+        const label = node.getLabels()[0];
+        if (label == undefined) return acc
+        if (!acc[label]) {
+          acc[label] = [node];
+          return acc;
+        }
+        acc[label].push(node);
+        return acc;
+      }, {});
+    }
   }
 
   /**

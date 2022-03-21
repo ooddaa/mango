@@ -679,6 +679,24 @@ describe("buildNodes()", () => {
   });
 
   describe("nodes with multiple labels", () => {
+    /**
+     * [2022-03-20] Discovered case where I was building a KG and
+     * added Node1 (:Label1)
+     * added Node1 (:Label1,Label2)
+     * and ended up with two different but essentially unique Node.
+     * 
+     * What needs to happen is
+     * Node1 (:Label1 { _labels: [Label1, Label2]}) - Label2 is being added
+     * to _labels, and Node1 has only first Label1. 
+     * 
+     * This way I will preserve the Node's essential uniqueness and anything 
+     * that further specifies is ADDED to the Node, and won't affect its _hash and
+     * any other _hashes (relationships, mb somewhere this _hash is used and there is
+     * no link to that to update it etc.).
+     * 
+     * If user decides that the current representation of the Node is not describing it
+     * apropriately, user will explicitly delete Node and go from there. 
+     */
     const labels = ["Label1", "Label2"];
     const nodeObj = new NodeCandidate({
       labels,
@@ -702,13 +720,16 @@ describe("buildNodes()", () => {
       const rv: Result[] = builder.buildNodes([nodeObj]);
       const node = rv[0].getData();
 
-      // labels
-      expect(node.getLabels()).toEqual(labels);
+      /* labels */
+      /* we get the passed labels back */
+      expect(node.getLabels()).toEqual(labels); 
 
-      // _label
-      expect(node.getProperty("_label")).toEqual(labels.join("|"));
+      /* _label */
+      /* only first label gets assigned to Node as part of the unique descriptor! */
+      expect(node.getProperty("_label")).toEqual(labels[0]);
 
-      // _labels
+      /* _labels */
+      /* same as .getLabels() but as _private prop */
       expect(node.getProperty("_labels")).toEqual(labels);
     });
   });
