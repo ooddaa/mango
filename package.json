@@ -1,10 +1,11 @@
 {
-  "name": "mango",
+  "name": "@ooddaa/mango",
   "version": "1.1.1",
   "public": true,
   "main": "./lib/index.js",
   "description": "Object-to-Graph Mapping tool for Node.js and Neo4j",
   "repository": "github:ooddaa/mango.git",
+  "npm": "@ooddaa/mango",
   "keywords": [
     "graphs",
     "structures",
