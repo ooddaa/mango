@@ -74,7 +74,10 @@ const mango = new Mango({
 
 ### findNode
 
-Main method to search for data in Neo4j.
+Main method to search for Nodes in Neo4j.
+Search granularity:
+Broadest  - by label only
+Narrow    - by label + props
 
 #### Parameters
 

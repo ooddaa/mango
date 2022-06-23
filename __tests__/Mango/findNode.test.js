@@ -64,6 +64,8 @@ describe("Node exists", () => {
     expect(mergedNode[0].getData().getId()).toEqual(products[0].getId());
   });
 
+  
+
   describe("non-exact match", () => {
     test("use shorthand to match 3 out of 3 Nodes", async () => {
       /// db setup
@@ -206,6 +208,54 @@ describe("Node exists", () => {
 
       expect(mergedNode[1].getData().getId()).toEqual(products[0].getId());
       expect(mergedNode[2].getData().getId()).toEqual(products[1].getId());
+    });
+
+    test("matches by label only", async () => {
+      /// db setup
+      /**
+       * Merge 3 nodes into DB, all have same NAME prop.
+       * Match by NAME.
+       * Since it's an exactMatch, only one will come back.
+       */
+      await engine.cleanDB();
+  
+      const node1 = builder.makeNode(["Passport"], {
+        PASSPORT_NUMBER: "123",
+        TYPE: "P",
+      });
+      const node2 = builder.makeNode(["Passport"], {
+        PASSPORT_NUMBER: "456",
+        TYPE: "P",
+      });
+      const node3 = builder.makeNode(["Passport"], {
+        PASSPORT_NUMBER: "789",
+        TYPE: "P",
+      });
+      const node4 = builder.makeNode(["Not_Passport"], {
+        NOT_PASSPORT_NUMBER: "000",
+        TYPE: "ID",
+      });
+      const mergedNodes: Result[] = await engine.mergeNodes([node1, node2, node3, node4]);
+      expect(mergedNodes[0]).toBeInstanceOf(Success);
+      /// !db setup
+  
+      const passports /* : Node[] */ = await mango.findNode(
+        ["Passport"]
+      );
+  
+      expect(passports).toBeInstanceOf(Array);
+      expect(passports).toHaveLength(3);
+      expect(passports[0]).toMatchObject({
+        labels: ["Passport"],
+        properties: {
+          PASSPORT_NUMBER: expect.any(String),
+          TYPE: "P",
+        },
+        ...dbProps,
+      });
+  
+      // /* ID is the same, ie no copies */
+      // expect(mergedNodes[0].getData().getId()).toEqual(passports[0].getId());
     });
   });
 });

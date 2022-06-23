@@ -5,3 +5,6 @@
 
 [2022-03-20][1.1.0] 
     1. Node handles multiple labels differently: only the first label is used to compose Node's _hash and is displayed as (:FirstLabel { _label: FirstLabel, _labels: [FirstLabel, OtherLabels] }). 
+
+[2022-06-23][1.1.1] 
+    1. Mango.findNode - props are now optional. Use case - to search all Nodes by the label only. 
