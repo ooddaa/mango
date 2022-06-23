@@ -195,7 +195,10 @@ class Mango {
   }
 
   /**
-   * Main method to search for data in Neo4j.
+   * Main method to search for Nodes in Neo4j.
+   * Search granularity: 
+   *    Broadest  - by label only
+   *    Narrow    - by label + props
    *
    * @public
    * @param {string[]} labels - Array of labels to match Nodes by.
@@ -222,14 +225,15 @@ class Mango {
    */
   async findNode(
     labels: string[],
-    props: Object,
+    props?: Object,
     config: {
       exactMatch: boolean,
       returnResult: boolean,
     } = {}
   ) {
+
     const { requiredProps, optionalProps, privateProps } = this.decomposeProps(
-      props
+      props || {}
     );
 
     if (config.exactMatch) {
@@ -252,7 +256,7 @@ class Mango {
     const pnode: Result[] = this.builder.buildPartialNodes([
       {
         labels,
-        properties: { ...this._buildSearchedProps(props) },
+        properties: { ...this._buildSearchedProps(props || {}) },
       },
     ]);
 
