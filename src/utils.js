@@ -831,6 +831,14 @@ function hasLeadingDash(word) {
  * @returns {Object}
  */
 function getRequiredProperties(props /* : Object */) /* : Object */ {
+  // let properties;
+  // if (!props) {
+  //   if (this) {
+  //     if (has(this, 'properties')) {
+  //       properties = this.properties
+  //     }
+  //   }
+  // }
   let properties = props || this.properties;
   const REQUIRED = keys(properties).filter(
     (word) => not(hasLeadingDash(word)) && isUpperCased(word)

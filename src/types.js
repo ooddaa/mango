@@ -3,7 +3,7 @@
  * Defines all types used in application in one place.
  * https://flow.org/en/docs/types/utilities/
  */
-import { Success, Failure, Relationship, EnhancedNode } from ".";
+import { Success, Failure, Relationship, EnhancedNode, Node } from ".";
 
 export type Integer = { low: number, high: number };
 declare type monthName =

@@ -20,6 +20,8 @@ import has from "lodash/has";
 import keys from "lodash/keys";
 import isArray from "lodash/isArray";
 import isObject from "lodash/isObject";
+import isString from 'lodash/isString';
+import isNumber from 'lodash/isNumber';
 
 import type { properties, identity, Integer } from "../../types";
 
@@ -564,6 +566,33 @@ function isNode(val: any): boolean {
 }
 
 /**
+ * Checks if value is for all intends and purposes, a Node
+ * has 
+ * labels: string[]
+ * identity: { low: number, high: number }
+ * properties: { _hash: string, _uuid: string }
+ * 
+ * @param {*} val 
+ */
+function isNodeLike(value: any): boolean {
+  let hasValidLabels = false;
+  let hasValidIdentity = false;
+  let hasValidProperties = false;
+  if (has(value, 'labels') && isArray(value.labels) && value.labels.every(isString)) {
+    hasValidLabels = true
+  }
+  if (has(value, 'identity') && isObject(value.identity) && (isNumber(value.identity.low) && isNumber(value.identity.high))) {
+    hasValidIdentity = true
+  }
+  if (has(value, 'properties') && isObject(value.properties) 
+  && (has(value.properties, '_hash') && isString(value.properties._hash))
+  && (has(value.properties, '_uuid') && isString(value.properties._uuid))) {
+    hasValidProperties = true
+  }
+  return hasValidLabels && hasValidIdentity && hasValidProperties
+}
+
+/**
  * Function to check if supplied node satisfies Node constructor requirements.
  * Minimal nodeObject configuration: 
  *  {
@@ -599,4 +628,4 @@ function isSameNode(nodeA: Node, nodeB: Node): boolean {
   return Boolean((nodeA.getHash() === nodeB.getHash()) && (nodeA.getId() === nodeB.getId()))
 }
 
-export { Node, isNode, isNodeObj, isWrittenNode, isSameNode };
+export { Node, isNode, isNodeLike, isNodeObj, isWrittenNode, isSameNode };

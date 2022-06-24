@@ -67,6 +67,7 @@ export {
 export {
   Node,
   isNode,
+  isNodeLike,
   isNodeObj,
   isWrittenNode,
   isSameNode,

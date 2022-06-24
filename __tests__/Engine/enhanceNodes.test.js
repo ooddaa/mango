@@ -11,6 +11,7 @@ import {
   isSuccess,
   getResultData,
   log,
+  isFailure,
 } from "../../src";
 
 import uniqBy from "lodash/uniqBy";
@@ -291,3 +292,59 @@ describe("use cases", async () => {
     expect(pete_enode).toEqual(pete_enode_copy);
   });
 });
+describe('accepts a nodeLikeObject', () => {
+  test('NaturalPerson, doesnt exist', async () => {
+    const naturalPerson = {
+      labels: [ 'NaturalPerson' ],
+      properties: {
+        PLACE_OF_BIRTH: 'London',
+        _date_created: [ 2022, 6, 24, 5, 1656069125493 ],
+        _template: 'Node',
+        _hash: 'f7e99766e1be9141c6d923beb680b594950c9d500e7fcf07fe4398c614538520',
+        SEX: 'Male',
+        _uuid: '169055c2-ffdc-4644-95f7-33b4f405ce23',
+        LAST_NAME: '1000',
+        _label: 'NaturalPerson',
+        FIRST_NAME: 'Hrabrazavr',
+        otherNames: 'Bodaka',
+        CURRENT_ADDRESS: 'JamesLee',
+        previousNames: 'sdf',
+        nickname: 'Motya',
+        DATE_OF_BIRTH: '2018-10-21',
+        _labels: [ 'NaturalPerson' ]
+      },
+      identity: { low: 20, high: 0 },
+      relationships: { inbound: [], outbound: [] }
+    }
+    const rv = await engine.enhanceNodes([naturalPerson])
+    expect(isFailure(rv[0])).toEqual(true)
+    expect(rv[0].reason).toEqual('no such Node found in database')
+  })
+  test('NaturalPerson, does exist, nodeLikeObject', async () => {
+    const naturalPerson = {
+      labels: [ 'NaturalPerson' ],
+      properties: {
+        PLACE_OF_BIRTH: 'London',
+        _date_created: [ 2022, 6, 24, 5, 1656069125493 ],
+        _template: 'Node',
+        _hash: 'f7e99766e1be9141c6d923beb680b594950c9d500e7fcf07fe4398c614538520',
+        SEX: 'Male',
+        _uuid: '169055c2-ffdc-4644-95f7-33b4f405ce23',
+        LAST_NAME: '1000',
+        _label: 'NaturalPerson',
+        FIRST_NAME: 'Hrabrazavr',
+        otherNames: 'Bodaka',
+        CURRENT_ADDRESS: 'JamesLee',
+        previousNames: 'sdf',
+        nickname: 'Motya',
+        DATE_OF_BIRTH: '2018-10-21',
+        _labels: [ 'NaturalPerson' ]
+      },
+      identity: { low: 20, high: 0 },
+      relationships: { inbound: [], outbound: [] }
+    }
+    const rv = await engine.enhanceNodes([naturalPerson])
+    expect(isFailure(rv[0])).toEqual(true)
+    expect(rv[0].reason).toEqual('no such Node found in database')
+  })
+})

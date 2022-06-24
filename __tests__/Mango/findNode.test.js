@@ -64,8 +64,6 @@ describe("Node exists", () => {
     expect(mergedNode[0].getData().getId()).toEqual(products[0].getId());
   });
 
-  
-
   describe("non-exact match", () => {
     test("use shorthand to match 3 out of 3 Nodes", async () => {
       /// db setup

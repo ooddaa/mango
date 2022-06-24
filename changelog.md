@@ -8,3 +8,5 @@
 
 [2022-06-23][1.1.1] 
     1. Mango.findNode - props are now optional. Use case - to search all Nodes by the label only. 
+[2022-06-24][1.1.2] 
+    1. Engine.enhancedNode - acceps NodeLikeObject. Use case - if it quacks like a Node, if it walks like a Node, it is a NodeLikeObject.

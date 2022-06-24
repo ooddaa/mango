@@ -13,6 +13,7 @@ import {
 } from "../Builder/templates/EnhancedNode";
 import {
   isNode,
+  isNodeLike,
   isSameNode,
   isWrittenNode,
   Node,
@@ -83,7 +84,7 @@ const NEO4J_RETURNED_NULL = "Neo4j returned null.";
 const sessionPool = {};
 
 /* TYPES */
-import type { UpdatingPair, UpdatedPair, timeArray } from "../types";
+import type { UpdatingPair, UpdatedPair, timeArray, SimplifiedNode } from "../types";
 declare type CypherQuery = { query: string, parameters: Object };
 declare type QueryObject = { query: string, originalNode: Node };
 declare type Result = Success | Failure;
@@ -1337,7 +1338,7 @@ class Engine {
    * @returns {Promise<Result[]>}
    */
   async matchNodes(
-    nodes: Node | EnhancedNode[],
+    nodes: (Node | EnhancedNode )[],
     config: {
       // extract: boolean,
     } = {}
@@ -1355,8 +1356,20 @@ class Engine {
 
     /* make a holder for validated objects */
     const holder: (Failure | Node)[] = arr.map((node) => {
+      if (isNodeLike(node)) {
+        // log(node)
+        const newNode = new Node(node)
+        // const newNode = new EnhancedNode(node)
+        // log(newNode)
+        // log(isNode(newNode))
+        return newNode
+      }
+
       /* check it's a Node */
       if (not(isNode(node))) {
+
+        /* attempt to create a node */
+        // const newNode 
         return new Failure({
           reason: `Engine.matchNodes: automat: only instances of Node can be matched.`,
           parameters: { node },
@@ -2229,7 +2242,7 @@ class Engine {
    * @returns {Promise<Result[]>}
    */
   async enhanceNodes(
-    arr: Node[],
+    arr: (Node|EnhancedNode|SimplifiedNode)[],
     obj: {
       extract: boolean,
       hops: number,
@@ -2251,10 +2264,20 @@ class Engine {
      * 2. enhance each Node.
      */
     const results: Result[] = await this.matchNodes(arr);
+
     const data = await Promise.all(
       results.map(async (result) => {
         if (isFailure(result)) return result;
         // return await enhance(result.getData(), hops, this); // transformer
+        // log(result)
+        const data: any[] = result.getData()
+        if (data.length === 0) {
+          return new Failure({
+            reason: 'no such Node found in database',
+            parameters: result.parameters,
+            data: []
+          });
+        }
         return await enhance(result.getData()[0], hops, this); // wrapper
       })
     );
@@ -2268,7 +2291,7 @@ class Engine {
      * Check input.
      * @param {*} nodes
      */
-    function _validateArguments(nodes: (Node | EnhancedNode)[]): Result {
+    function _validateArguments(nodes: (Node | EnhancedNode | SimplifiedNode)[]): Result {
       if (!Array.isArray(nodes)) {
         return new Failure({
           reason: `Engine.enhanceNodes: Validation error: first argument must be array.\nfirst argument: ${JSON.stringify(
@@ -2287,10 +2310,11 @@ class Engine {
           data: nodes,
         });
 
-      const isnode = nodes.map(isNode);
+      // const isnode = nodes.map(isNode);
+      const isnode = nodes.map(node => isNode(node) || isNodeLike(node));
       if (!isnode.every(isTrue)) {
         return new Failure({
-          reason: `Engine.enhanceNodes: Validation error: first argument must be (Node|EnhancedNode)[].\nfirst argument: ${JSON.stringify(
+          reason: `Engine.enhanceNodes: Validation error: first argument must be (Node|EnhancedNode|SimplifiedNode)[].\nfirst argument: ${JSON.stringify(
             isNode
           )}`,
           data: nodes,
