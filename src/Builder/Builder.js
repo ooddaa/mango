@@ -1242,6 +1242,7 @@ class Builder {
 
         /* Simple end case. */
         if (isSimplifiedNode(partnerNode)) {
+          // log('isSimplifiedNode')
           partnerNode = makeNode(
             partnerNode.labels,
             ...decomposeProps(partnerNode.properties, {
@@ -1430,17 +1431,61 @@ function isSimplifiedNode(obj: any): boolean {
   const conditions = {
     labelsOk: isLabelsOk(labels),
     propertiesOk: isPropertiesOk(properties),
+    // relationships: { inbound: [], outbound: [] 
     noRelationships:
-      isMissing(relationships) ||
-      (isArray(relationships) && relationships.length == 0),
+    // at least conform to standard, although empty
+
+      /* no relationships whatsoever */
+      isMissing(relationships) || (
+        /* or relationships is not object */
+        isObject(relationships) 
+        && 
+        
+        /* or object has no inbound/outbound props */
+        (has(relationships, 'inbound') && 
+        has(relationships, 'outbound'))
+
+        && 
+        /* or inbound/outbound aren't Arrays */
+        (isArray(relationships.inbound) && 
+        isArray(relationships.outbound)) 
+
+        && 
+        /* or inbound/outbound are empty Arrays */
+        (relationships.inbound.length === 0 && relationships.inbound.length === 0)
+      ),
   };
 
   if (values(conditions).every(isTrue)) {
+    // log('isSimplifiedNode true', obj)
     return true;
   } else {
+    // log('isSimplifiedNode false', obj, conditions)
     return false;
   }
 }
+// function isSimplifiedNode(obj: any): boolean {
+//   /* { labels: string[], properties: Object, } */
+//   if (not(isObject(obj))) {
+//     return false;
+//   }
+//   let { labels, properties, relationships } = obj;
+//   const conditions = {
+//     labelsOk: isLabelsOk(labels),
+//     propertiesOk: isPropertiesOk(properties),
+//     noRelationships:
+//       isMissing(relationships) ||
+//       (isArray(relationships) && relationships.length == 0),
+//   };
+
+//   if (values(conditions).every(isTrue)) {
+//     // log('isSimplifiedNode true', obj)
+//     return true;
+//   } else {
+//     log('isSimplifiedNode false', obj, conditions)
+//     return false;
+//   }
+// }
 
 function isSimplifiedEnhancedNode(obj: any): boolean {
   /* { labels: string[], properties: Object, relationships: SimplifiedRelationship[] } */
@@ -1455,8 +1500,10 @@ function isSimplifiedEnhancedNode(obj: any): boolean {
   };
 
   if (values(conditions).every(isTrue)) {
+    // log('isSimplifiedEnhancedNode true', obj)
     return true;
   } else {
+    // log('isSimplifiedEnhancedNode false', obj, conditions)
     return false;
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@ooddaa/mango",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "public": true,
   "main": "./lib/index.js",
   "description": "Object-to-Graph Mapping tool for Node.js and Neo4j",
@@ -30,7 +30,8 @@
     "build": "cross-env BABEL_ENV=production ./node_modules/@babel/cli/bin/babel.js src --out-dir lib",
     "prepare": "npm run clean&& npm run build&& ./node_modules/.bin/documentation build src/Mango.js -f html -o docs --shallow --access='public'",
     "document": "./node_modules/.bin/documentation build src/Mango.js -f html -o docs --shallow -w --access='public'",
-    "documentForGitHubPages": "./node_modules/.bin/documentation build src/Mango.js -f md -o ./docs/index.md --shallow --access='public'&& git add ./docs/index.md"
+    "documentForGitHubPages": "./node_modules/.bin/documentation build src/Mango.js -f md -o ./docs/index.md --shallow --access='public'&& git add ./docs/index.md",
+    "npm-publish": "npm publish --access public"
   },
   "jest": {
     "testEnvironment": "node",

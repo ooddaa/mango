@@ -9,4 +9,6 @@
 [2022-06-23][1.1.1] 
     1. Mango.findNode - props are now optional. Use case - to search all Nodes by the label only. 
 [2022-06-24][1.1.2] 
-    1. Engine.enhancedNode - acceps NodeLikeObject. Use case - if it quacks like a Node, if it walks like a Node, it is a NodeLikeObject.
+    1. Engine.enhancedNode - accepts NodeLikeObject. Use case - if it quacks like a Node, if it walks like a Node, it is a NodeLikeObject.
+[2022-06-28][1.1.3] 
+    1. isSimplifiedNode - accepts a POJO with { relationships: { inbound: [], outbound: [] } } prop. So that Mango.buildAndMergeEnhancedNodes does not fail at _processRelationship when given a decent POJO by the frontend as a partnerNode for a relationship. 
