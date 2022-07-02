@@ -248,7 +248,11 @@ describe("use cases", () => {
                       properties: { dateFrom: [2022, 3, 15] },
                       partnerNode: {
                         labels: ["City"],
-                        properties: { NAME: "London" },
+                        properties: {
+                          NAME: "London",
+                          ATTRIBUTE_HASH: '7b554e5e0edbcca47c425f776274630686db3ea4cf03d95c3d3a44635409c06c',
+                          TIMELIMIT: false
+                        },
                       },
                     },
                     {
@@ -279,12 +283,12 @@ describe("use cases", () => {
       identity: London[0].identity,
       relationships: { inbound: [], outbound: [] } // found the bug!!
     }
-    
+
     /* now use londonPOJO as partnerNode in (London)-[:IS_CAPITAL_OF]->(GreatBritain) */
     const rv = await mango.buildAndMergeEnhancedNode({
       labels: ['Country'],
       properties: {
-        NAME: 'GreatBritain'
+        NAME: 'GreatBritain',
       },
       relationships: [
         {
