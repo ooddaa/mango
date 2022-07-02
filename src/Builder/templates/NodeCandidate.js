@@ -15,23 +15,28 @@ import isObject from 'lodash/isObject';
  * set defaults from the beginning of Node's life, ie here.
  */
 class NodeCandidate {
-    coreNode: Object | Failure
-    constructor(coreNode: Object) {
-        this.coreNode = coreNode
-        this.setDefaultProperties()
-    }
+  getCoreNode: () => Object | Node
+  setCoreNode: () => void
+  toNode: () => Node
+
+  coreNode: Object | Failure
+
+  constructor(coreNode: Object) {
+      this.coreNode = coreNode
+      this.setDefaultProperties()
+  }
 
 
-    setDefaultProperties(): void {
-        const coreNode = this.getCoreNode()
-        if (!coreNode || !isObject(coreNode)) return
-        coreNode.properties = {
-            required: {},
-            optional: {},
-            _private: {},
-            ...coreNode.properties,
-        }
-    }
+  setDefaultProperties(): void {
+      const coreNode = this.getCoreNode()
+      if (!coreNode || !isObject(coreNode)) return
+      coreNode.properties = {
+          required: {},
+          optional: {},
+          _private: {},
+          ...coreNode.properties,
+      }
+  }
 }
 
 /**
