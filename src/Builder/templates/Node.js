@@ -11,6 +11,7 @@ import {
   getRequiredProperties,
   getOptionalProperties,
   getPrivateProperties,
+  stringify
 } from "../..";
 
 import util from "util";
@@ -24,6 +25,7 @@ import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 
 import type { properties, identity, Integer } from "../../types";
+import { isNull } from "lodash";
 
 /**
  * @todo make .toString() return without ':' - then we could run CQL without named variables.
@@ -161,13 +163,13 @@ Node.prototype.hasher = hasher
  * @to_be_depricated as useless - use this.hasher instead
  * @param {*} data_to_hash 
  */
-function createHash(data): String {
+function createHash(data): string {
   const hash = this.hasher(data);
   return hash;
 }
 Node.prototype.createHash = createHash
 
-function getHash(): String | typeof undefined {
+function getHash(): string | typeof undefined {
   return this.properties._hash;
 }
 Node.prototype.getHash = getHash
@@ -202,49 +204,46 @@ function setHash(): void {
     })
   );
 }
-// function setHash(): void {
-//   const props = this.getRequiredProperties();
-//   /* in case we don't have any required properties, we'll hash by first label only */
-//   if (!keys(props).length) {
-//     /* USE ONLY FIRST LABEL FOR HASH! */
-//     const hash = this.createHash(JSON.stringify(this.getLabels()[0]));
-//     this.properties._hash = hash
-//     return
-//   }
-//   /* hmm something somewhere will break =) hello, bug! */
-
-//   this.properties._hash = this.createHash(
-//     `${this.getLabels()[0] || ""}${this.toString({ parameter: "all", requiredPropsOnly: true })}`
-//   );
-// }
 Node.prototype.setHash = setHash
 
-function setLabels(val): Node {
+function setLabels(val: string[]): Node {
+  if (isMissing(val) || not(isArray(val)) || not(val.every(isString))) {
+    throw new Error(`Node.setLabels: val should be string[].\nval: ${stringify(val)}`)
+  }
   this.labels = val
   return this
 }
 Node.prototype.setLabels = setLabels
 
-function addLabel(val): void {
+function addLabel(val: string): void {
+  if (not(isString(val))) {
+    throw new Error(`Node.addLabel: val should be a string.\nval: ${stringify(val)}`)
+  }
   this.labels.push(val)
 }
 Node.prototype.addLabel = addLabel
 
 function setProperties(val: Object): void {
   /**
-   *  @todo add val check
+   *  @todo add val check, no nested objects, no heterogenous arrays as Neo4j cannot handle those
    */
   this.properties = val
 }
 Node.prototype.setProperties = setProperties
 
-function addProperty(propName, propVal): Node {
-  this.properties[propName] = propVal
+function addProperty(propName: string, propVal: string): Node {
+  if (not(isString(propName)) || not(isString(propVal))) {
+    throw new Error(`Node.addProperty: propName & propVal should be strings.\npropName: ${stringify(propName)}.\npropVal ${stringify(propVal)}`)
+  }
+  this.properties[propName] = propVal;
   return this
 }
 Node.prototype.addProperty = addProperty
 
-function setIdentity(val): Node {
+function setIdentity(val: number | string | null): Node {
+  if (not(isString(val)) || not(isNumber(val)) || not(isNull(val))) {
+    throw new Error(`Node.setIdentity: val should be number | string | null.\nval: ${stringify(val)}`)
+  }
   this.identity = val
   return this
 }
@@ -252,9 +251,8 @@ Node.prototype.setIdentity = setIdentity
 
 /**
  * Only first label is used for stringification. 
- * @param {*} parameter 
- * @param {*} param1 
- * @returns 
+ * @param {Object} config  
+ * @returns {string}
  */
 function toString(
   config: { 
@@ -319,68 +317,6 @@ function toString(
     this.properties
   )}`;
 }
-// // function toString(
-//   //   parameter: string = "all",
-//   //   { REQUIRED, required, optional, _private } = {}
-//   // ): string {
-// function toString(
-//   config: { 
-//     firstLabelOnly: boolean, 
-//     required: boolean, 
-//     optional: boolean, 
-//     _private: boolean 
-//   } = {}
-// ): string {
-//   let firstLabelOnly = config.firstLabelOnly || false;
-//   let required = config.required || true;
-//   let optional = config.optional || false;
-//   let _private = config._private || false;
-  
-//   if (parameter === "labels") {
-//     return `${this.stringifyLabel(this.labels)}`;
-//   }
-//   if (parameter === "all") {
-//     if (REQUIRED || required)
-//       return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
-//         this.getRequiredProperties()
-//       )}`;
-//     if (optional)
-//       return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
-//         this.getOptionalProperties()
-//       )}`;
-//     if (_private)
-//       return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
-//         this.getPrivateProperties()
-//       )}`;
-//     return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
-//       this.properties
-//     )}`;
-//   }
-//   if (parameter === "properties") {
-//     if (REQUIRED || required)
-//       return `${this.stringifyProperties(
-//         this.getRequiredProperties()
-//       )}`.slice(1);
-//     if (optional)
-//       return `${this.stringifyProperties(
-//         this.getOptionalProperties()
-//       )}`.slice(1);
-//     if (_private)
-//       return `${this.stringifyProperties(this.getPrivateProperties())}`.slice(
-//         1
-//       );
-//     return `${this.stringifyProperties(this.properties)}`.slice(1);
-//   }
-//   if (parameter === "no hash") {
-//     const { _hash, ...rest } = this.properties;
-//     return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
-//       rest
-//     )}`;
-//   }
-//   return `${this.stringifyLabel(this.getLabels()[0] || "")}${this.stringifyProperties(
-//     this.properties
-//   )}`;
-// }
 Node.prototype.toString = toString
 
 function toObject(): Object {
@@ -442,7 +378,7 @@ function toNodeObj(): Object {
         return acc;
       } else {
         // return 'convert_Node_to_nodeObj: Error: something wroong!'
-        throw new Error(`Node.toNodeObj(): something went wrong! ${JSON.stringify(obj)}`);
+        throw new Error(`Node.toNodeObj(): something went wrong!\n${stringify(obj)}`);
       }
     }, obj);
     return result;
@@ -538,7 +474,7 @@ Node.prototype.isComplete = isComplete
 /**
  * Used by home.updateHTransactions (wrapper around engine.updateNodesById).
  */
-function toUpdateById() {
+function toUpdateById(): Object {
   // [{ id: 123, properties: {a:1, b:2}}]
   // const properties = {
   //   ...this.getRequiredProperties(),
@@ -572,7 +508,7 @@ function isNode(val: any): boolean {
  * identity: { low: number, high: number }
  * properties: { _hash: string, _uuid: string }
  * 
- * @param {*} val 
+ * @param {any} val 
  */
 function isNodeLike(value: any): boolean {
   let hasValidLabels = false;
