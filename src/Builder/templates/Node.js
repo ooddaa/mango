@@ -4,6 +4,7 @@ import { IdArray, isIdArray } from "../../IdArray";
 import {
   isMissing,
   isPresent,
+  isNeo4jId,
   not,
   int,
   toNumber,
@@ -11,7 +12,7 @@ import {
   getRequiredProperties,
   getOptionalProperties,
   getPrivateProperties,
-  stringify
+  stringify,
 } from "../..";
 
 import util from "util";
@@ -49,7 +50,7 @@ class Node {
   getPrivateProperties: Function
   createHash: Function
   getHash: Function
-  setHash: Function
+  setHash: () => void
   setLabels: Function
   addLabel: Function
   setProperties: Function
@@ -240,9 +241,14 @@ function addProperty(propName: string, propVal: string): Node {
 }
 Node.prototype.addProperty = addProperty
 
-function setIdentity(val: number | string | null): Node {
-  if (not(isString(val)) || not(isNumber(val)) || not(isNull(val))) {
-    throw new Error(`Node.setIdentity: val should be number | string | null.\nval: ${stringify(val)}`)
+interface Neo4jIdentityObj {
+    low: number,
+    high: number
+}
+// function setIdentity(val: number | string | null): Node {
+function setIdentity(val: Neo4jIdentityObj): Node {
+  if (not(isNeo4jId(val))) {
+    throw new Error(`Node.setIdentity: val should be Neo4jIdentityObj { low: number, high: number }.\nval: ${stringify(val)}`)
   }
   this.identity = val
   return this
