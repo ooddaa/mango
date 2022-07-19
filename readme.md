@@ -12,14 +12,14 @@ The idea behind the project is to build a tool to makes it easy to perform
 - Read
 - Update
 - Delete
-  operations on Neo4j Graph Database using JavaScript.
+  operations on Neo4j Graph Database using plain JavaScript objects.
 
 ## Philosophy:
 
 Graphs are powerful because they are visually obvious. You may draw a graph to simplify something. It takes a purely abstract thought concept and makes it appear as a 2D model in front of your eyes.
 
-Graphs are powerful because they are simple. As a basic data structure a Node or (Node), can represent any amount of data. If (Node1) and (Node2) have a way to associate, then it could
-be expressed as (Node1)-[:RELATES_TO]->(Node2). And there you have it - a full blown Knowledge Graph!
+Graphs are powerful because they are simple. As a basic data structure, a Node or (Node), can represent any data. If (Node1) and (Node2) have a way to associate, then it could be expressed as ```(Node1)-[:RELATES_TO]->(Node2)``` 
+And there you have it - a full blown Knowledge Graph!
 
 Now think of adding properties to Nodes and its Relationships and the expressive potential is limitless.
 
@@ -28,8 +28,18 @@ real-world services.
 
 Go to [doc](https://ooddaa.github.io/mango/) to read full documentation.
 
+## Install
+```npm i @ooddaa/mango```
+or alias it in package.json
+```"mango": "npm:@ooddaa/mango@^1.1.3"```
+
 ## Tests
 
 To run tests, add Neo4j credentials to config/testing.json file:
 
 `{ "neo4jUsername": "neo4j", "neo4jPassword": "password", "ip": "0.0.0.0", "port": "7687", "env": "testing", "database": "test" }`
+
+then do
+```npm test```
+
+Feel free to open any issues/PRs.
