@@ -1,3 +1,4 @@
+import type { Integer } from '../index.d.ts'
 export class Node {
   constructor(config: {
     labels?: string[],
@@ -7,7 +8,7 @@ export class Node {
 
   getId(param?: string): number | null
   getLabels(): string[]
-  getProperties(parameter: string = "number"): Object
+  getProperties(parameter: string): Object
   getProperty(prop: string): any // string | string[] | number | number[] | boolean | null | typeof undefined | smth else?
   hasher(data: string): string
   createHash(data): string

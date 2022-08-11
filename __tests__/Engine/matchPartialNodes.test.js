@@ -1126,4 +1126,49 @@ describe("conditions", () => {
 
     expect(enodes.length).toEqual(3);
   });
+  /* ============================================================== */
+  test("contains && CONTAINS", async () => {
+    /**
+     * Checking `contains`, used for fuzzy matching on strings.
+     * 
+     * Going to fuzzy match Claire as Clai
+     *
+     new NodeCandidate({
+        labels: ["Node3"],
+        properties: {
+          required: {
+            NAME: "Claire",
+            LAST_NAME: "Four",
+          },
+        },
+      }),
+     *
+     */
+    const pnodes: PartialNode[] = builder.buildPartialNodes(
+      [
+        {
+          labels: ["Node3"],
+          properties: {
+            NAME: {
+              isCondition: true,
+              type: "string",
+              key: "NAME",
+              value: [
+                {
+                  contains: ["Clai"], // matches Claire
+                  // contains: "Clai", // also matches Claire
+                },
+              ],
+            },
+          },
+        },
+      ],
+      { extract: true }
+    );
+
+    const results: Result[] = await engine.matchPartialNodes(pnodes);
+    const enodes: EnhancedNode[] = results[0].getData();
+    // log(enodes)
+    expect(enodes.length).toEqual(1);
+  });
 });

@@ -86,6 +86,7 @@ Narrow    - by label + props
 *   `config` **[Object][37]** Configuration object. (optional, default `{}`)
 
     *   `config.exactMatch` **[boolean][40]** {true} Mango searches for exactly what we specified, ie the returned Nodes must not have any extra properties above supplied labels & properties. You get exactly what you asked for.{false} Mango matches any Nodes that have supplied labels and properties and the returned result may contain Nodes with extra properties. You may get more than you asked for. (optional, default `false`)
+    *   `config.fuzzy` **[boolean][40]** {true} Mango does a fuzzy match on strings. !!! as of 220811 tested on single property only{false} Mango does a strict match on strings. (optional, default `false`)
     *   `config.returnResult` **[boolean][40]** {true} returns a Result with additional Neo4j query data.{false} return Node\[]. (optional, default `false`)
 
 #### Examples
@@ -102,6 +103,12 @@ log(results.every(isEnhancedNode));        // true
 log(results.length);                       // 2 <- we found 2 Nodes with NAME == 'Bob'
 log(results[0].getProperty("FULL_NAME"));  // Bob Dylan
 log(results[1].getProperty("FULL_NAME"));  // Bob Marley
+
+// fuzzy matching
+const results: EnhancedNode[] = await mango.findNode(["Person"], { FULL_NAME: 'Dyl' }, { fuzzy: true });
+log(results.every(isEnhancedNode));        // true
+log(results.length);                       // 1 <- we found 1 Bob Dylan
+log(results[0].getProperty("FULL_NAME"));  // Bob Dylan
 ```
 
 Returns **[Promise][41]<(Result | [Array][39]<[Node][42]>)>** 

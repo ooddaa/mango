@@ -216,7 +216,7 @@ describe("Node exists", () => {
        * Since it's an exactMatch, only one will come back.
        */
       await engine.cleanDB();
-  
+
       const node1 = builder.makeNode(["Passport"], {
         PASSPORT_NUMBER: "123",
         TYPE: "P",
@@ -236,11 +236,11 @@ describe("Node exists", () => {
       const mergedNodes: Result[] = await engine.mergeNodes([node1, node2, node3, node4]);
       expect(mergedNodes[0]).toBeInstanceOf(Success);
       /// !db setup
-  
+
       const passports /* : Node[] */ = await mango.findNode(
         ["Passport"]
       );
-  
+
       expect(passports).toBeInstanceOf(Array);
       expect(passports).toHaveLength(3);
       expect(passports[0]).toMatchObject({
@@ -251,9 +251,75 @@ describe("Node exists", () => {
         },
         ...dbProps,
       });
-  
+
       // /* ID is the same, ie no copies */
       // expect(mergedNodes[0].getData().getId()).toEqual(passports[0].getId());
     });
   });
+
+  describe("fuzzy match", () => {
+    test('single prop fuzzy match: find Keanu Reeves as Keanu', async () => {
+      /// db setup
+      /**
+       * Merge 3 nodes into DB, all have same NAME prop.
+       * Match by NAME.
+       * Since it's an exactMatch, only one will come back.
+       */
+      await engine.cleanDB();
+
+      const node1 = builder.makeNode(["Person"], {
+        NAME: "Keanu Reeves",
+      });
+      const node2 = builder.makeNode(["Person"], {
+        NAME: "KeanuReeves",
+      });
+      const node3 = builder.makeNode(["Person"], {
+        NAME: "Keanu",
+      });
+      const node4 = builder.makeNode(["Person"], {
+        NAME: "Reeves",
+      });
+      const mergedNodes: Result[] = await engine.mergeNodes([node1, node2, node3, node4]);
+      expect(mergedNodes[0]).toBeInstanceOf(Success);
+      /// !db setup
+
+       const keanus /* : Node[] */ = await mango.findNode(["Person"], { NAME: 'Keanu' }, { fuzzy: true });
+
+      expect(keanus).toBeInstanceOf(Array);
+      expect(keanus).toHaveLength(3);
+      expect(keanus[0].properties.NAME.includes('Keanu')).toEqual(true)
+    })
+
+    test.skip('select props to fuzzy match on: find Keanu Reeves as Keanu, and all Neos', async () => {
+      /// db setup
+      /**
+       * Merge 3 nodes into DB, all have same NAME prop.
+       * Match by NAME.
+       * Since it's an exactMatch, only one will come back.
+       */
+      await engine.cleanDB();
+
+      const node1 = builder.makeNode(["Person"], {
+        NAME: "Keanu Reeves",
+      });
+      const node2 = builder.makeNode(["Person"], {
+        NAME: "KeanuReeves",
+      });
+      const node3 = builder.makeNode(["Person"], {
+        NAME: "Keanu",
+      });
+      const node4 = builder.makeNode(["Person"], {
+        NAME: "Reeves",
+      });
+      const mergedNodes: Result[] = await engine.mergeNodes([node1, node2, node3, node4]);
+      expect(mergedNodes[0]).toBeInstanceOf(Success);
+      /// !db setup
+
+       const keanus /* : Node[] */ = await mango.findNode(["Person"], { NAME: 'Keanu' }, { fuzzy: true });
+
+      expect(keanus).toBeInstanceOf(Array);
+      expect(keanus).toHaveLength(3);
+      expect(keanus[0].properties.NAME.includes('Keanu')).toEqual(true)
+    })
+  })
 });

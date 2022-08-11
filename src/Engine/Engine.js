@@ -1825,36 +1825,24 @@ class Engine {
                     value_item
                   )})`;
                 } else if (["CONTAINS", "contains", "~", "=~"].includes(cond)) {
-                  function worker(val) {
+                  function worker(val: string | string[]) {
                     const holder = [];
-                    if (isArray(val)) {
-                      val.forEach((el, idx) => {
-                        if (
-                          val.length <= 1 || // is it the last element?
-                          idx == val.length - 1 // is it the last element?
-                        ) {
-                          holder.push(
-                            `x.${key} CONTAINS ${stringifyPerType(el)}`
-                          );
-                        } else {
-                          holder.push(
-                            `x.${key} CONTAINS ${stringifyPerType(el)} OR`
-                          );
-                        }
-                      });
-                    } else {
-                      holder.push(stringifyPerType(val));
-                    }
+
+                    /**@todo this is unweildy but works */
+                    holder.push(`x.${key} CONTAINS ${stringifyPerType(
+                      isString(val) ? val :
+                      (isArray(val) && val.length === 1) ? val[0] :
+                      isArray(val) ? Array.from(val).forEach((el, idx) => {
+                        holder.push(`x.${key} CONTAINS ${stringifyPerType(el)} OR`)
+                      }) : val
+                    )}`);
+
                     return holder.join(" ");
                   }
 
                   result = worker(value_item);
                 }
-                // } else if (["CONTAINS", "contains", "~", "=~"].includes(cond)) {
-                //   result = `x.${key} CONTAINS ${stringifyPerType(
-                //     isArray(value_item) ? value_item[0] : value_item
-                //   )}`;
-                // }
+
                 else {
                   if (isString(value_item)) {
                     result = `x.${key} ${cond} '${value_item}'`;

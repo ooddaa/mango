@@ -222,6 +222,9 @@ class Mango {
    * @param {boolean} [config.exactMatch=false] - {true} Mango searches for exactly what we specified, ie the returned Nodes must not have any extra properties above supplied labels & properties. You get exactly what you asked for.
    *
    * {false} Mango matches any Nodes that have supplied labels and properties and the returned result may contain Nodes with extra properties. You may get more than you asked for.
+   * @param {boolean} [config.fuzzy=false] - {true} Mango does a fuzzy match on strings. !!! as of 220811 tested on single property only 
+   *
+   * {false} Mango does a strict match on strings.
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
    * {false} return Node[].
@@ -240,12 +243,19 @@ class Mango {
    * log(results.length);                       // 2 <- we found 2 Nodes with NAME == 'Bob'
    * log(results[0].getProperty("FULL_NAME"));  // Bob Dylan
    * log(results[1].getProperty("FULL_NAME"));  // Bob Marley
+   * 
+   * // fuzzy matching
+   * const results: EnhancedNode[] = await mango.findNode(["Person"], { FULL_NAME: 'Dyl' }, { fuzzy: true });
+   * log(results.every(isEnhancedNode));        // true
+   * log(results.length);                       // 1 <- we found 1 Bob Dylan
+   * log(results[0].getProperty("FULL_NAME"));  // Bob Dylan
    */
   async findNode(
     labels: string[],
     props?: Object,
     config: {
       exactMatch: boolean,
+      fuzzy: Boolean,
       returnResult: boolean,
     } = {}
   ) {
@@ -254,6 +264,7 @@ class Mango {
       props || {}
     );
 
+    /* if exact match, make a new Node and match it 100% */
     if (config.exactMatch) {
       const node = this.builder.makeNode(
         labels,
@@ -268,13 +279,30 @@ class Mango {
 
       return result[0].getData();
     }
+    
+    /**
+     * @todo interface limitation - we will have either ALL or NOTHING 
+     * fuzzy matched here. better would be to receive { PROP1: "VAL"}, 
+     * { fuzzyByKey: ["PROP1", "PROP2"] } so we know which keys are fuzzy matched
+     * props { NAME: 'Keanu' }  => NAME: search('contains', ['Keanu']
+     */
+    function fuzzySearchProps(props: Object): Object {
+      const newProps = {}
+      for (let key in props) {
+        newProps[key] = Mango.search('contains', [props[key]])
+      }
+      return newProps
+    }
+    const searchProps = config.fuzzy ? 
+    this._buildSearchedProps(fuzzySearchProps(props) || {})
+    : this._buildSearchedProps(props || {}) 
 
-    // not an exact match, use engine.matchPartialNodes
-    // create PartialNodes
     const pnode: Result[] = this.builder.buildPartialNodes([
       {
         labels,
-        properties: { ...this._buildSearchedProps(props || {}) },
+        properties: { 
+          ...searchProps
+        },
       },
     ]);
 
