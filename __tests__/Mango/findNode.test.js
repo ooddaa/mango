@@ -260,11 +260,6 @@ describe("Node exists", () => {
   describe("fuzzy match", () => {
     test('single prop fuzzy match: find Keanu Reeves as Keanu', async () => {
       /// db setup
-      /**
-       * Merge 3 nodes into DB, all have same NAME prop.
-       * Match by NAME.
-       * Since it's an exactMatch, only one will come back.
-       */
       await engine.cleanDB();
 
       const node1 = builder.makeNode(["Person"], {
@@ -290,23 +285,24 @@ describe("Node exists", () => {
       expect(keanus[0].properties.NAME.includes('Keanu')).toEqual(true)
     })
 
-    test.skip('select props to fuzzy match on: find Keanu Reeves as Keanu, and all Neos', async () => {
+    test('select props to fuzzy match on: find Keanu Reeves as Keanu, and all Neos', async () => {
       /// db setup
-      /**
-       * Merge 3 nodes into DB, all have same NAME prop.
-       * Match by NAME.
-       * Since it's an exactMatch, only one will come back.
-       */
       await engine.cleanDB();
 
       const node1 = builder.makeNode(["Person"], {
         NAME: "Keanu Reeves",
+        CHARACTER: "Neo",
+        SOME_PROP: "lol",
       });
       const node2 = builder.makeNode(["Person"], {
         NAME: "KeanuReeves",
+        CHARACTER: "Neovim",
+        SOME_PROP: "foo",
       });
       const node3 = builder.makeNode(["Person"], {
         NAME: "Keanu",
+        CHARACTER: "John Wick",
+        SOME_PROP: "bar",
       });
       const node4 = builder.makeNode(["Person"], {
         NAME: "Reeves",
@@ -315,11 +311,14 @@ describe("Node exists", () => {
       expect(mergedNodes[0]).toBeInstanceOf(Success);
       /// !db setup
 
-       const keanus /* : Node[] */ = await mango.findNode(["Person"], { NAME: 'Keanu' }, { fuzzy: true });
+       const keanus /* : Node[] */ = await mango.findNode(["Person"], { NAME: 'Keanu', CHARACTER: "Neo" }, { fuzzyProps: ["NAME", "CHARACTER"] });
 
       expect(keanus).toBeInstanceOf(Array);
-      expect(keanus).toHaveLength(3);
+      expect(keanus).toHaveLength(2);
       expect(keanus[0].properties.NAME.includes('Keanu')).toEqual(true)
+      expect(keanus[0].properties.CHARACTER.includes('Neo')).toEqual(true)
+      expect(keanus[1].properties.NAME.includes('Keanu')).toEqual(true)
+      expect(keanus[1].properties.CHARACTER.includes('Neo')).toEqual(true)
     })
   })
 });

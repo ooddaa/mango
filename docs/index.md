@@ -87,6 +87,7 @@ Narrow    - by label + props
 
     *   `config.exactMatch` **[boolean][40]** {true} Mango searches for exactly what we specified, ie the returned Nodes must not have any extra properties above supplied labels & properties. You get exactly what you asked for.{false} Mango matches any Nodes that have supplied labels and properties and the returned result may contain Nodes with extra properties. You may get more than you asked for. (optional, default `false`)
     *   `config.fuzzy` **[boolean][40]** {true} Mango does a fuzzy match on strings. !!! as of 220811 tested on single property only{false} Mango does a strict match on strings. (optional, default `false`)
+    *   `config.fuzzyProps` **[Array][39]<[string][38]>** {string\[]} Mango does a fuzzy match on selected properties strings. (optional, default `[]`)
     *   `config.returnResult` **[boolean][40]** {true} returns a Result with additional Neo4j query data.{false} return Node\[]. (optional, default `false`)
 
 #### Examples

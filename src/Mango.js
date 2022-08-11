@@ -225,6 +225,8 @@ class Mango {
    * @param {boolean} [config.fuzzy=false] - {true} Mango does a fuzzy match on strings. !!! as of 220811 tested on single property only 
    *
    * {false} Mango does a strict match on strings.
+   * @param {string[]} [config.fuzzyProps=[]] - {string[]} Mango does a fuzzy match on selected properties strings.
+   *
    * @param {boolean} [config.returnResult=false] - {true} returns a Result with additional Neo4j query data.
    *
    * {false} return Node[].
@@ -255,11 +257,18 @@ class Mango {
     props?: Object,
     config: {
       exactMatch: boolean,
-      fuzzy: Boolean,
+      fuzzy: boolean,
+      fuzzyProps: string[],
       returnResult: boolean,
     } = {}
   ) {
 
+    /**
+     * @todo think of a better mechanism to prefer fuzzy > fuzzyProps
+     */
+    if (config.fuzzy && config.fuzzyProps && config.fuzzyProps.length !== 0) {
+      throw new Error(`Mango.findNode: either fuzzy: boolean | fuzzyProps: string[] should be supplied, or none, but not both.\nfuzzy: ${String(config.fuzzy)}\nfuzzyProps: ${stringify(config.fuzzyProps)}`)
+    }
     const { requiredProps, optionalProps, privateProps } = this.decomposeProps(
       props || {}
     );
@@ -281,20 +290,35 @@ class Mango {
     }
     
     /**
-     * @todo interface limitation - we will have either ALL or NOTHING 
-     * fuzzy matched here. better would be to receive { PROP1: "VAL"}, 
-     * { fuzzyByKey: ["PROP1", "PROP2"] } so we know which keys are fuzzy matched
+     * Adds "contains" condition to props to allow fuzzy matching on 
+     * 
+     * all props - if config.fuzzy === true
+     * or
+     * selected props - of config.fuzzyProps === non empty string[] 
      * props { NAME: 'Keanu' }  => NAME: search('contains', ['Keanu']
      */
-    function fuzzySearchProps(props: Object): Object {
+    function makeFuzzySearchProps(props: Object): Object {
       const newProps = {}
-      for (let key in props) {
-        newProps[key] = Mango.search('contains', [props[key]])
+      if (config.fuzzy) {
+        for (let key in props) {
+          newProps[key] = Mango.search('contains', [props[key]])
+        }
+      } else if (config.fuzzyProps && config.fuzzyProps.length !== 0 && config.fuzzyProps.every(isString)) {
+        for (let key in props) {
+          if (config.fuzzyProps.includes(key)) {
+            newProps[key] = Mango.search('contains', [props[key]])
+          } else {
+            newProps[key] = props[key]
+          }
+        }
+      } else {
+        throw new Error(`Mango.findNode.makeFuzzySearchProps: cannot decide which fuzzy matching is required:\nconfig: ${stringify(config)}`)
       }
       return newProps
     }
-    const searchProps = config.fuzzy ? 
-    this._buildSearchedProps(fuzzySearchProps(props) || {})
+
+    const searchProps = config.fuzzy || (config.fuzzyProps && config.fuzzyProps.length !== 0) ? 
+    this._buildSearchedProps(makeFuzzySearchProps(props) || {})
     : this._buildSearchedProps(props || {}) 
 
     const pnode: Result[] = this.builder.buildPartialNodes([
