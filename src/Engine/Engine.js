@@ -50,7 +50,7 @@ import {
   stringify,
 } from "../utils";
 import { flatten as _flatten, isFunction } from "lodash";
-import clondeDeep from "lodash/cloneDeep";
+import cloneDeep from "lodash/cloneDeep";
 import flattenDeep from "lodash/flattenDeep";
 import has from "lodash/has";
 import isNumber from "lodash/isNumber";
@@ -58,7 +58,6 @@ import keys from "lodash/keys";
 import values from "lodash/values";
 import zip from "lodash/zip";
 import uniq from "lodash/uniq";
-import cloneDeep from "lodash/cloneDeep";
 import identity from "lodash/identity";
 import forIn from "lodash/forIn";
 import { v4 as uuid } from "uuid";
@@ -995,7 +994,7 @@ class Engine {
      * @returns {Object} where key:value == [_hash]: Relationship
      */
     function _toRelHashMap(arr: EnhancedNode[]): Object {
-      return clondeDeep(arr).reduce((acc, val) => {
+      return cloneDeep(arr).reduce((acc, val) => {
         acc = {
           ...acc,
           ...val.getParticipatingRelationships({
@@ -1351,7 +1350,7 @@ class Engine {
       // extract: boolean,
     } = {}
   ): Promise<Result[]> {
-    const arr = clondeDeep(nodes);
+    const arr = cloneDeep(nodes);
     /* validations */
     if (!arr.length) {
       return [
@@ -1565,7 +1564,7 @@ class Engine {
     } = {}
   ): Promise<Result[]> {
     /* pure function */
-    const arr = clondeDeep(partialNodes);
+    const arr = cloneDeep(partialNodes);
     /* !pure function */
     /* validations */
     {
@@ -1841,10 +1840,10 @@ class Engine {
                     /**@todo this is unweildy but works */
                     holder.push(`x.${key} CONTAINS ${stringifyPerType(
                       isString(val) ? val :
-                      (isArray(val) && val.length === 1) ? val[0] :
-                      isArray(val) ? Array.from(val).forEach((el, idx) => {
-                        holder.push(`x.${key} CONTAINS ${stringifyPerType(el)} OR`)
-                      }) : val
+                      (isArray(val) && val.length === 1) ? flattenDeep(val)[0] :
+                      isArray(val) ? flattenDeep(val).forEach(
+                        (el, idx) => holder.push(`x.${key} CONTAINS ${stringifyPerType(el)} OR`)
+                      ) : val
                     )}`);
 
                     return holder.join(" ");
@@ -3411,7 +3410,7 @@ class Engine {
     } = {}
   ): Promise<Result[]> {
     /* pure function */
-    const rels = clondeDeep(_rels);
+    const rels = cloneDeep(_rels);
     /* !pure function */
 
     /* validations */

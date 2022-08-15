@@ -1127,48 +1127,80 @@ describe("conditions", () => {
     expect(enodes.length).toEqual(3);
   });
   /* ============================================================== */
-  test("contains && CONTAINS", async () => {
-    /**
-     * Checking `contains`, used for fuzzy matching on strings.
-     * 
-     * Going to fuzzy match Claire as Clai
-     *
-     new NodeCandidate({
-        labels: ["Node3"],
-        properties: {
-          required: {
-            NAME: "Claire",
-            LAST_NAME: "Four",
-          },
-        },
-      }),
-     *
-     */
-    const pnodes: PartialNode[] = builder.buildPartialNodes(
-      [
-        {
+  describe("contains && CONTAINS", () => {
+    test("allows fuzzy matching on string properties", async () => {
+      /**
+       * Checking `contains`, used for fuzzy matching on strings.
+       * 
+       * Going to fuzzy match Claire as Clai
+       *
+       new NodeCandidate({
           labels: ["Node3"],
           properties: {
-            NAME: {
-              isCondition: true,
-              type: "string",
-              key: "NAME",
-              value: [
-                {
-                  contains: ["Clai"], // matches Claire
-                  // contains: "Clai", // also matches Claire
-                },
-              ],
+            required: {
+              NAME: "Claire",
+              LAST_NAME: "Four",
             },
           },
-        },
-      ],
-      { extract: true }
-    );
-
-    const results: Result[] = await engine.matchPartialNodes(pnodes);
-    const enodes: EnhancedNode[] = results[0].getData();
-    // log(enodes)
-    expect(enodes.length).toEqual(1);
-  });
+        }),
+       *
+       */
+      const pnodes: PartialNode[] = builder.buildPartialNodes(
+        [
+          {
+            labels: ["Node3"],
+            properties: {
+              NAME: {
+                isCondition: true,
+                type: "string",
+                key: "NAME",
+                value: [
+                  {
+                    contains: ["Clai"], // matches Claire
+                    // contains: "Clai", // also matches Claire
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        { extract: true }
+      );
+  
+      const results: Result[] = await engine.matchPartialNodes(pnodes);
+      const enodes: EnhancedNode[] = results[0].getData();
+      // log(enodes)
+      expect(enodes.length).toEqual(1);
+    });
+    test("[use case bug] flattens passed values", async () => {
+      /* I had a bug where Cypher query was 'blabla contains ['string'] return x' which returned null */
+      const pnodes: PartialNode[] = builder.buildPartialNodes(
+        [
+          {
+            labels: ["Node3"],
+            properties: {
+              NAME: {
+                isCondition: true,
+                type: "string",
+                key: "NAME",
+                value: [
+                  {
+                    contains: [["Clai"]], // matches Claire
+                    // contains: "Clai", // also matches Claire
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        { extract: true }
+      );
+  
+      const results: Result[] = await engine.matchPartialNodes(pnodes);
+      const enodes: EnhancedNode[] = results[0].getData();
+      // log(enodes)
+      expect(enodes.length).toEqual(1);
+    });
+  })
+  
 });
