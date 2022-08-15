@@ -356,7 +356,8 @@ class Mango {
     const result = await this.engine.matchPartialNodes([pnode[0].getData()]);
 
     if (config.returnResult) {
-      log("final 2");
+      // log("final 2");
+      log(`returnResult`, result)
       return result[0];
     }
 

@@ -366,11 +366,11 @@ describe("returns Result", () => {
             (result) => {
               return result;
             },
-            (error) => {}
+            (error) => { }
           );
           promise.catch(
             // rejecter
-            (error) => {}
+            (error) => { }
           );
           return promise;
         },
@@ -416,4 +416,25 @@ describe("returns Result", () => {
       expect(isSuccess(result)).toEqual(true);
     });
   });
+  describe("use cases", () => {
+    test("client needs to see executed query", async () => {
+      /// db setup
+      /* DB is empty, just fire a query and access it on Result.query */
+      await engine.cleanDB();
+      const query = `CREATE (n:Person {name: 'Andy', title: 'Developer'}), (x:Person {name: 'Bobby', title: 'Magician'}) RETURN n, x`;
+      /// !db setup
+
+      const result: Result = await engine.runQuery({ query });
+      // log(result)
+
+      expect(isSuccess(result)).toEqual(true);
+      expect(result.query).toEqual(query);
+
+      /* query + params as part of result.summary */
+      expect(result.summary.query).toEqual({
+        text: query,
+        parameters: {}
+      })
+    })
+  })
 });

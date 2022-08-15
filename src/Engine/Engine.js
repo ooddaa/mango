@@ -108,32 +108,40 @@ declare type _Stats = {
   constraintsRemoved: Number,
 };
 declare type Summary = {
-  statement: {
-    text: String,
+  query: {
+    text: string,
     parameters: {},
   },
-  statementType: String,
+  queryType: string,
   counters: {
     _stats: _Stats,
+    _systemUpdates: number,
+    _containUpdates: boolean,
   },
   updateStatistics: _Stats,
   plan: boolean,
   profile: false,
   notifications: any[],
   server: {
-    address: String,
-    version: String,
+    address: string,
+    version: string,
+    agent: string,
+    protocolVersion: number,
   },
   resultConsumedAfter: {
-    low: Number,
-    high: Number,
+    low: number,
+    high: number,
   },
   resultAvailableAfter: {
-    low: Number,
-    high: Number,
+    low: number,
+    high: number,
   },
+  database: { name: string }
 };
-declare type Neo4jResult = { records: Record[], summary: Summary };
+declare type Neo4jResult = { 
+  records: Record[],
+  summary: Summary 
+};
 
 /**
  * @public
@@ -1715,7 +1723,7 @@ class Engine {
         query,
       };
     });
-
+    
     /**
      * 4. runQuery
      * Returns [Result, Result] R.data = EnhancedNode[] | []
@@ -1723,9 +1731,8 @@ class Engine {
     const data: Result[] = await Promise.all(
       array_to_query.map(async function queryRunner(node) {
         if (isFailure(node)) return node;
-
+        
         const { query, PartialNode } = node;
-
         const result: Result = await ctx.runQuery({ query });
         const innerData: Result[] | EnhancedNode[] = result.getData();
 
@@ -1738,7 +1745,10 @@ class Engine {
         let enodes: EnhancedNode[] = _flatten(innerData);
         if (enodes.every(isEnhancedNode)) {
           /* all good */
-          return new Success({ data: enodes });
+          return new Success({ 
+            data: enodes, 
+            query: result.query, 
+            summary: result.summary });
         }
         throw new Error(
           `Engine.matchPartialNodes.queryRunner: did not expect to reach here.\nnode: ${stringify(
@@ -3837,6 +3847,7 @@ function wrapper(
     returnSuccess: boolean,
   } = {}
 ): { data: (Node | Relationship | Success | Failure)[], summary: Object } {
+
   /* defaults */
   const returnSuccess = isMissing(obj.returnSuccess)
     ? false
@@ -3847,7 +3858,7 @@ function wrapper(
   let data;
 
   if (!result.records.length) {
-    data = [new Success({ reason: NEO4J_RETURNED_NULL, data: [] })];
+    data = [new Success({ reason: NEO4J_RETURNED_NULL, data: [], summary })];
     return { data, summary };
   }
 
