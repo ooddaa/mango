@@ -3,12 +3,10 @@
 
 import {
   parameters_to_string_array,
-  fac,
   isIdentificationArray,
   convert_Node_to_nodeObj,
   log,
-  read_xlsx,
-  read_csv
+  chunkEvery,
 } from "../src/";
 import fs from "fs";
 
@@ -101,4 +99,25 @@ test("convert_Node_to_nodeObj", () => {
   const result = convert_Node_to_nodeObj(node);
   expect(result).toEqual(nodeObj);
 });
+
+describe('chunkEvery', () => {
+  test('simple', () => {
+    expect(chunkEvery([1, 2, 3, 4], 1)).toEqual([[1], [2], [3], [4]])
+    expect(chunkEvery([1, 2, 3, 4], 2)).toEqual([[1, 2], [3, 4]])
+    expect(chunkEvery([1, 2, 'foo', 'bar'], 2)).toEqual([[1, 2], ['foo', 'bar']])
+    expect(chunkEvery([1, 2, 3, 4], 3)).toEqual([[1, 2, 3], [4]])
+    expect(chunkEvery([1, 2, 3, 4], 4)).toEqual([[1, 2, 3, 4]])
+
+    expect(chunkEvery([1, 2, 3, 4], 5)).toEqual([[1, 2, 3, 4]])
+  })
+  test('with steps', () => {
+    expect(chunkEvery([1, 2, 3, 4], 2, 1)).toEqual([[1, 2], [2, 3], [3, 4]])
+    expect(chunkEvery([1, 2, 3, 4, 5], 2, 1)).toEqual([[1, 2], [2, 3], [3, 4], [4, 5]])
+
+    expect(chunkEvery([1, 2, 3, 4], 2, 2)).toEqual([[1, 2], [3, 4]])
+    expect(chunkEvery([1, 2, 3, 4, 5], 2, 2)).toEqual([[1, 2], [3, 4], [5]])
+    expect(chunkEvery([1, 2, 3, 'foo', 'bar'], 2, 2)).toEqual([[1, 2], [3, 'foo'], ['bar']])
+    expect(chunkEvery([1, 2, 3, 4], 2, 3)).toEqual([[1, 2], [4]])
+  })
+})
 

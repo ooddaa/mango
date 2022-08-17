@@ -62,6 +62,7 @@ export {
   unwrapIfInArray,
   stringify,
   decomposeProps,
+  chunkEvery,
 } from "./utils.js";
 
 export {

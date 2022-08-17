@@ -16,6 +16,7 @@ import _isString from "lodash/isString";
 import _isNumber from "lodash/isNumber";
 import _isObject from "lodash/isObject";
 import isArray from "lodash/isArray";
+import cloneDeep from "lodash/cloneDeep";
 
 import { values } from "lodash";
 
@@ -918,6 +919,59 @@ function decomposeProps(props: Object, config: Object = {}): Object {
   return result;
 }
 
+/**
+ * Chunks array into sub-arrays. May use a step to add positive/negative
+ * gaps between chunks - can implement overlapping.
+ * Useful if we have an Object[] and want to build/merge EnhancedNodes.
+ * 
+ * Inspired by Elixir's Enum.chunkEvery/3
+ * pure function
+ * 
+ * @param {any[]} arr_ - Array of items to chunk
+ * @param {number} size - Size of a chunk
+ * @param {number?} step - Each new chunk starts step elements into array
+ * @returns {Array<T>[]} - Chunked array of passed elements
+ * 
+ * @example
+ * expect(chunkEvery([1, 2, 3, 4], 1)).toEqual([[1], [2], [3], [4]])
+ * expect(chunkEvery([1, 2, 3, 4], 2)).toEqual([[1, 2], [3, 4]])
+ * expect(chunkEvery([1, 2, 3, 4], 3)).toEqual([[1, 2, 3], [4]])
+ * expect(chunkEvery([1, 2, 3, 4], 4)).toEqual([[1, 2, 3, 4]])
+ * expect(chunkEvery([1, 2, 3, 4], 5)).toEqual([[1, 2, 3, 4]])
+ * 
+ * expect(chunkEvery([1, 2, 'foo', 'bar'], 2)).toEqual([[1, 2], ['foo', 'bar']])
+ * 
+ * expect(chunkEvery([1, 2, 3, 4], 2, 1)).toEqual([[1, 2], [2, 3], [3, 4]])
+ * expect(chunkEvery([1, 2, 3, 4], 2, 2)).toEqual([[1, 2], [3, 4]])
+ * expect(chunkEvery([1, 2, 3, 4], 2, 3)).toEqual([[1, 2], [4]])
+ * 
+ * expect(chunkEvery([1, 2, 3, 4, 5], 2, 1)).toEqual([[1, 2], [2, 3], [3, 4], [4, 5]])
+ * expect(chunkEvery([1, 2, 3, 'foo', 'bar'], 2, 2)).toEqual([[1, 2], [3, 'foo'], ['bar']])
+ */
+function chunkEvery<T>(arr_: Array<T>, size: number, step?: number): Array<T>[] {
+  const arr = cloneDeep(arr_)
+  const holder = []
+  if (!step) {
+    while (arr.length > 0) holder.push(arr.splice(0, size))
+    return holder
+  } 
+
+  /* with step */
+  const gap = size - step
+  let left = 0
+  let right = left + size
+
+  holder.push(arr.slice(left, right))
+
+  while (right < arr.length) {
+    left = right - gap
+    right = right > arr.length ? arr.length : left + size
+    holder.push(arr.slice(left, right))
+  }
+
+  return holder
+}
+
 export {
   log,
   superlog,
@@ -977,4 +1031,6 @@ export {
   unwrapIfInArray,
   stringify,
   decomposeProps,
+
+  chunkEvery
 };
