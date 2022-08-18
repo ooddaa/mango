@@ -1,6 +1,6 @@
 /* @flow */
 import { engine } from "../../start";
-import { Mango, Builder, log, Result, Success, EnhancedNode } from "../../src";
+import { Mango, Builder, log, Result, Success, EnhancedNode, chunkEvery, isEnhancedNode } from "../../src";
 
 const builder = new Builder();
 const mango = new Mango({ builder, engine });
@@ -303,4 +303,185 @@ describe("use cases", () => {
 
 
   })
+  test("chunked Object[] to EnhancedNode[] - no copies", async () => {
+    /// db setup
+    await engine.cleanDB();
+    /// !db setup
+    /**
+     * Discord bot - got array of messages, chunked into [[a,b],[b,c]]
+     * called 
+     * const enodes = await Promise.all(
+      messageChain.map(async ([startNode, endNode]) => {
+        return await mangoConversation.buildAndMergeEnhancedNode({
+          labels: ["Message"], ... blabla
+
+      !!! which resulted in copies - got two identical Nodes written, which
+      not supposed to happen.!!! 
+      went other way -  -> mango.buildAndMergeEnhancedNode(await mango.buildDeepSimplifiedEnhancedNode(arr))
+     */
+    const arr = [
+      {
+        id: 'abc1',
+        content: 'lol_abc1'
+      },
+      {
+        id: 'abc2',
+        content: 'lol_abc2'
+      },
+      {
+        id: 'abc3',
+        content: 'lol_abc3'
+      },
+    ]
+    const chunked = chunkEvery(arr, 2, 1)
+    // log(chunked)
+
+    const enodes1 = await Promise.all(
+      chunked.slice(0,1).map(async ([startNode, endNode]) => {
+        return await mango.buildAndMergeEnhancedNode({
+          labels: ["Message"], 
+          properties: {
+            ID: startNode.id,
+            CONTENT: startNode.content,
+          },
+          relationships: [
+            {
+              labels: ['NEXT'],
+              partnerNode: { 
+                labels: ["Message"], 
+                properties: { 
+                  ID: endNode.id,
+                  CONTENT: endNode.content,
+                } 
+              },
+            }
+          ]
+        })
+      })
+    )
+    const enodes2 = await Promise.all(
+      chunked.slice(1,2).map(async ([startNode, endNode]) => {
+        return await mango.buildAndMergeEnhancedNode({
+          labels: ["Message"], 
+          properties: {
+            ID: startNode.id,
+            CONTENT: startNode.content,
+          },
+          relationships: [
+            {
+              labels: ['NEXT'],
+              partnerNode: { 
+                labels: ["Message"], 
+                properties: { 
+                  ID: endNode.id,
+                  CONTENT: endNode.content,
+                } 
+              },
+            }
+          ]
+        })
+      })
+    )
+    
+    // const enodes = await Promise.all(
+    //   chunked.map(async ([startNode, endNode]) => {
+    //     return await mango.buildAndMergeEnhancedNode({
+    //       labels: ["Message"], 
+    //       properties: {
+    //         ID: startNode.id,
+    //         CONTENT: startNode.content,
+    //       },
+    //       relationships: [
+    //         {
+    //           labels: ['NEXT'],
+    //           partnerNode: { 
+    //             labels: ["Message"], 
+    //             properties: { 
+    //               ID: endNode.id,
+    //               CONTENT: endNode.content,
+    //             } 
+    //           },
+    //         }
+    //       ]
+    //     })
+    //   })
+    // )
+    // log(enodes)
+    // log(enodes1)
+    // log(enodes2)
+  })
+  describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
+    const arr = [
+      {
+        labels: ["Node"],
+        properties: {
+          NAME: "root",
+          value: 0,
+        },
+      },
+      {
+        labels: ["Node"],
+        properties: {
+          NAME: "child1",
+          value: 1,
+        },
+      },
+      {
+        labels: ["Node"],
+        properties: {
+          NAME: "child2",
+          value: 2,
+        },
+      },
+      {
+        labels: ["Node"],
+        properties: {
+          NAME: "child3",
+          value: 3,
+        },
+      },
+    ]
+    test("default rels -[NEXT]->", async () => {
+      /// db setup
+      await engine.cleanDB();
+      /// !db setup
+      
+      const enode = mango.buildDeepSimplifiedEnhancedNode(arr)
+      const rv = await mango.buildAndMergeEnhancedNode(enode)
+      // log(rv)
+      expect(isEnhancedNode(rv)).toEqual(true)
+      expect(rv.isWritten()).toEqual(true)
+      expect(rv.getParticipatingRelationships()).toHaveLength(3)
+      expect(rv.getParticipatingNodes()).toHaveLength(4) // includes parent
+    })
+    test("custom rels", async () => {
+      /// db setup
+      await engine.cleanDB();
+      /// !db setup
+      const labels = ["LIKES"]
+      const prop = `(${arr[0].properties.NAME})-[LIKES]->(${arr[1].properties.NAME})`
+  
+      function fn(start, end) {
+        if (start.properties.NAME === 'root') {
+          return {
+            labels,
+            properties: { prop }
+          }
+        } 
+        return {
+          labels: ["NEXT"],
+        }
+      }
+      
+      const enode = mango.buildDeepSimplifiedEnhancedNode(arr, fn)
+      const rv = await mango.buildAndMergeEnhancedNode(enode)
+  
+      expect(isEnhancedNode(rv)).toEqual(true)
+      expect(rv.isWritten()).toEqual(true)
+      expect(rv.getParticipatingRelationships()[0].labels).toEqual(labels)
+      expect(rv.getParticipatingRelationships()[0].properties).toMatchObject({ prop }) // has custom prop
+      expect(rv.getParticipatingRelationships()[1].properties.prop).toBeUndefined() // does not have custom prop
+    })
+  })
+  
 })

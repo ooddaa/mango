@@ -167,10 +167,10 @@ class Builder {
       validateOptionals?: boolean,
       template?: Template | typeof undefined,
     } = {
-      extract: false,
-      validateOptionals: false,
-      template: undefined,
-    }
+        extract: false,
+        validateOptionals: false,
+        template: undefined,
+      }
   ): Result[] {
     const { extract, validateOptionals, template } = obj;
     /* validations */
@@ -267,7 +267,7 @@ class Builder {
       newNode.labels = node.labels;
       newNode.properties._label =
         node.labels[0] || null;
-        // node.labels.length !== 0 ? node.labels.join("|") : null;
+      // node.labels.length !== 0 ? node.labels.join("|") : null;
       newNode.properties._labels = node.labels;
 
       /* set _template */
@@ -278,7 +278,7 @@ class Builder {
 
       /* make final Node */
       const finalNode = new Node({ ...newNode });
-      
+
       /* set _hash */
       finalNode.setHash();
 
@@ -380,13 +380,13 @@ class Builder {
       stopAfterRelNodes: boolean,
       stopAfterRelationships: boolean,
     } = {
-      extract: false,
-      template: undefined,
-      ignore: undefined,
-      stopAfterCoreNodes: false,
-      stopAfterRelNodes: false,
-      stopAfterRelationships: false,
-    }
+        extract: false,
+        template: undefined,
+        ignore: undefined,
+        stopAfterCoreNodes: false,
+        stopAfterRelNodes: false,
+        stopAfterRelationships: false,
+      }
   ): Result[] {
     const {
       extract,
@@ -790,11 +790,11 @@ class Builder {
       flatten: boolean,
       keepFailures: boolean,
     } = {
-      hashType: "labels",
-      extract: false,
-      flatten: true,
-      keepFailures: false,
-    }
+        hashType: "labels",
+        extract: false,
+        flatten: true,
+        keepFailures: false,
+      }
   ): Result[] {
     const { hashType, extract, flatten, keepFailures } = obj;
 
@@ -1061,12 +1061,12 @@ class Builder {
       /* should recognize both nodeObj and PartialNodes */
       properties = isNodeObj(obj)
         ? keys(properties).reduce((acc, key) => {
-            acc = {
-              ...acc,
-              ...properties[key], // key == 'required' or 'optional'
-            };
-            return acc;
-          }, {})
+          acc = {
+            ...acc,
+            ...properties[key], // key == 'required' or 'optional'
+          };
+          return acc;
+        }, {})
         : properties;
 
       const newObj = { labels, properties };
@@ -1433,24 +1433,24 @@ function isSimplifiedNode(obj: any): boolean {
     propertiesOk: isPropertiesOk(properties),
     // relationships: { inbound: [], outbound: [] 
     noRelationships:
-    // at least conform to standard, although empty
+      // at least conform to standard, although empty
 
       /* no relationships whatsoever */
       isMissing(relationships) || (
         /* or relationships is not object */
-        isObject(relationships) 
-        && 
-        
+        isObject(relationships)
+        &&
+
         /* or object has no inbound/outbound props */
-        (has(relationships, 'inbound') && 
-        has(relationships, 'outbound'))
+        (has(relationships, 'inbound') &&
+          has(relationships, 'outbound'))
 
-        && 
+        &&
         /* or inbound/outbound aren't Arrays */
-        (isArray(relationships.inbound) && 
-        isArray(relationships.outbound)) 
+        (isArray(relationships.inbound) &&
+          isArray(relationships.outbound))
 
-        && 
+        &&
         /* or inbound/outbound are empty Arrays */
         (relationships.inbound.length === 0 && relationships.inbound.length === 0)
       ),

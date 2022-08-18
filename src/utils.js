@@ -972,6 +972,25 @@ function chunkEvery<T>(arr_: Array<T>, size: number, step?: number): Array<T>[] 
   return holder
 }
 
+/**
+ * As part of working on buildDeepSimplifiedEnhancedNode for Mango.buildAndMergeEnhancedNode
+ * @param {*} arr 
+ * @param {*} initAcc 
+ * @returns 
+ */
+function buildTreeFromArray(arr/* : Object[] */, initAcc/*? : Object */)/* : Object */ {
+  if (arr.length === 0) return initAcc // no elements to work with, terminate
+  const [head, ...tail] = arr
+  const acc_ = initAcc || { ...head, children: [] } // if no acc, take first el as acc and remove it from array
+  if (tail && tail.length && tail.length > 0) {
+    const newAcc = { ...acc_, children: [buildTreeFromArray(tail)] }
+
+    return newAcc
+  }
+  return acc_
+
+}
+
 export {
   log,
   superlog,
@@ -1032,5 +1051,6 @@ export {
   stringify,
   decomposeProps,
 
-  chunkEvery
+  chunkEvery,
+  buildTreeFromArray,
 };

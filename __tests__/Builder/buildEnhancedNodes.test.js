@@ -172,12 +172,12 @@ const candidate_misspelled_key = new EnhancedNodeCandidate(
   })
 );
 const _date_created = [
-    expect.any(Number),
-    expect.any(Number),
-    expect.any(Number),
-    expect.any(Number),
-    expect.any(Number),
-  ],
+  expect.any(Number),
+  expect.any(Number),
+  expect.any(Number),
+  expect.any(Number),
+  expect.any(Number),
+],
   _uuid = expect.any(String),
   _hash = expect.any(String),
   identity = { low: expect.any(Number), high: 0 };
@@ -1012,13 +1012,12 @@ describe("output", () => {
         // const candidate = new Enha
       });
     });
-    describe("deep enode", () => {});
   });
 });
 describe("edge cases", () => {
   test("accidently passed enc.isEnhanceable() == true", () => {
     const hash =
-        "7d5edc56943b093d130bfecfaad2e7e6d32649612bbaa1ee974e126c1c85d4b8",
+      "7d5edc56943b093d130bfecfaad2e7e6d32649612bbaa1ee974e126c1c85d4b8",
       date_created = [2020, 2, 19, 3, 1582124221818];
     const enc = new EnhancedNodeCandidate(
       new Node({

@@ -7,6 +7,7 @@ import {
   convert_Node_to_nodeObj,
   log,
   chunkEvery,
+  buildTreeFromArray,
 } from "../src/";
 import fs from "fs";
 
@@ -120,4 +121,56 @@ describe('chunkEvery', () => {
     expect(chunkEvery([1, 2, 3, 4], 2, 3)).toEqual([[1, 2], [4]])
   })
 })
+
+describe("buildTree", () => {
+  const tree = {
+    name: "root",
+    value: 0,
+    children: [
+      {
+        name: "child1",
+        value: 1,
+        children: [
+          {
+            name: "child2",
+            value: 2,
+            children: [
+              {
+                name: "child3",
+                value: 3,
+                children: []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+
+  test("first", () => {
+    const arr = [
+      {
+        name: "root",
+        value: 0,
+      },
+      {
+        name: "child1",
+        value: 1,
+      },
+      {
+        name: "child2",
+        value: 2,
+      },
+      {
+        name: "child3",
+        value: 3,
+      },
+    ]
+    const rv = buildTreeFromArray(arr)
+    // log('result', rv)
+    expect(rv).toMatchObject(tree)
+  })
+
+
+});
 

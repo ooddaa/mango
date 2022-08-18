@@ -70,6 +70,9 @@ class Mango {
   findNode: Function;
   deleteNode: Function;
   buildAndMergeNode: Function;
+  buildDeepSimplifiedEnhancedNode: Function;
+  buildAndMergeEnhancedNode: Function;
+  buildAndMergeEnhancedNodes: Function;
   buildAndMergeRelationship: Function;
   decomposeProps: Function;
   search: Function;
@@ -288,7 +291,7 @@ class Mango {
 
       return result[0].getData();
     }
-    
+
     /**
      * Adds "contains" condition to props to allow fuzzy matching on 
      * 
@@ -317,14 +320,14 @@ class Mango {
       return newProps
     }
 
-    const searchProps = config.fuzzy || (config.fuzzyProps && config.fuzzyProps.length !== 0) ? 
-    this._buildSearchedProps(makeFuzzySearchProps(props) || {})
-    : this._buildSearchedProps(props || {}) 
+    const searchProps = config.fuzzy || (config.fuzzyProps && config.fuzzyProps.length !== 0) ?
+      this._buildSearchedProps(makeFuzzySearchProps(props) || {})
+      : this._buildSearchedProps(props || {})
 
     const pnode: Result[] = this.builder.buildPartialNodes([
       {
         labels,
-        properties: { 
+        properties: {
           ...searchProps
         },
       },
@@ -1039,6 +1042,51 @@ class ConditionContainer {
     };
   }
 }
+
+/**
+   * @private
+   * 
+   * @idea Mango.buildDeepSimplifiedEnhancedNode will help transform SimplifiedEnhancedNode[] into a mergeable 
+   * deep EnhancedNode. 
+   * 
+   * @param {SimplifiedEnhancedNode[]} arr 
+   * @param {(startEnode, endEnode) => SimplifiedRelationship} fn - receives parent and child nodes and returns an object to use to describe relationship between them
+   * @returns {SimplifiedEnhancedNode}
+   * 
+   * @example
+   */
+function buildDeepSimplifiedEnhancedNode(arr: SimplifiedEnhancedNode[], fn?: Function): SimplifiedEnhancedNode {
+  const [startNode, ...descendants] = arr
+
+  let acc = { ...startNode, relationships: [] } // if no acc, take first el as acc and remove it from array
+  if (descendants && descendants.length) {
+
+    // describe relationship
+    if (fn && typeof fn === 'function') {
+      return {
+        ...acc,
+        relationships: [
+          {
+            ...fn(startNode, descendants[0]),
+            partnerNode: buildDeepSimplifiedEnhancedNode(descendants, fn)
+          }
+        ]
+      }
+    }
+    return {
+      ...acc,
+      relationships: [
+        {
+          labels: ['NEXT'],
+          partnerNode: buildDeepSimplifiedEnhancedNode(descendants, fn)
+        }
+      ]
+    }
+  }
+
+  return acc
+}
+Mango.prototype.buildDeepSimplifiedEnhancedNode = buildDeepSimplifiedEnhancedNode
 
 const search = Mango.search;
 export { Mango, search };

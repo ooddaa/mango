@@ -63,6 +63,7 @@ export {
   stringify,
   decomposeProps,
   chunkEvery,
+  buildTreeFromArray,
 } from "./utils.js";
 
 export {

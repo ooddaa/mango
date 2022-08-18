@@ -19,7 +19,7 @@ const dbProps = {
   identity: { low: expect.any(Number), high: 0 },
 };
 
-describe("clean DB", () => {
+describe("with clean DB", () => {
   test("multiple deep enodes", async () => {
     /// db setup
     await engine.cleanDB();
