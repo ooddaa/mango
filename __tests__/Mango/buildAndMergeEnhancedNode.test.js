@@ -413,7 +413,7 @@ describe("use cases", () => {
   describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
     const arr = [
       {
-        labels: ["Node"],
+        labels: ["Node1"],
         properties: {
           NAME: "root",
           value: 0,
@@ -463,6 +463,34 @@ describe("use cases", () => {
   
       function fn(start, end) {
         if (start.properties.NAME === 'root') {
+          return {
+            labels,
+            properties: { prop }
+          }
+        } 
+        return {
+          labels: ["NEXT"],
+        }
+      }
+      
+      const enode = mango.buildDeepSimplifiedEnhancedNode(arr, fn)
+      const rv = await mango.buildAndMergeEnhancedNode(enode)
+  
+      expect(isEnhancedNode(rv)).toEqual(true)
+      expect(rv.isWritten()).toEqual(true)
+      expect(rv.getParticipatingRelationships()[0].labels).toEqual(labels)
+      expect(rv.getParticipatingRelationships()[0].properties).toMatchObject({ prop }) // has custom prop
+      expect(rv.getParticipatingRelationships()[1].properties.prop).toBeUndefined() // does not have custom prop
+    })
+    test("custom rels based on startNode label", async () => {
+      /// db setup
+      await engine.cleanDB();
+      /// !db setup
+      const labels = ["LIKES"]
+      const prop = `(${arr[0].properties.NAME})-[LIKES]->(${arr[1].properties.NAME})`
+  
+      function fn(start, end) {
+        if (start.labels[0] === 'Node1') {
           return {
             labels,
             properties: { prop }
