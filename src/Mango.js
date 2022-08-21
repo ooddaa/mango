@@ -773,6 +773,7 @@ class Mango {
   ): Promise<Result | EnhancedNode> {
     /* there may be no relationships */
     relationships = relationships || [];
+    // log('buildAndMergeEnhancedNode relationships', relationships)
 
     const enode: EnhancedNode = this.builder.makeEnhancedNode(
       { labels, properties },
@@ -1055,22 +1056,27 @@ class ConditionContainer {
    * 
    * @example
    */
-function buildDeepSimplifiedEnhancedNode(arr: SimplifiedEnhancedNode[], fn?: Function): SimplifiedEnhancedNode {
+function buildDeepSimplifiedEnhancedNode(arr: SimplifiedEnhancedNode[], customizeRelationship?: Function): SimplifiedEnhancedNode {
   const [startNode, ...descendants] = arr
 
-  let acc = { ...startNode, relationships: [] } // if no acc, take first el as acc and remove it from array
+  let acc = { ...startNode, relationships: startNode.relationships || [] } 
+
   if (descendants && descendants.length) {
 
-    // describe relationship
-    if (fn && typeof fn === 'function') {
+    /* customize relationship */
+    if (customizeRelationship && typeof customizeRelationship === 'function') {
       return {
         ...acc,
         relationships: [
           {
-            ...fn(startNode, descendants[0]),
-            partnerNode: buildDeepSimplifiedEnhancedNode(descendants, fn)
+            ...customizeRelationship(startNode, descendants[0]),
+            partnerNode: buildDeepSimplifiedEnhancedNode(descendants, customizeRelationship)
           }
-        ]
+          /* keep existing relationships, provided by user */
+        ].concat(
+          (acc.relationships && isArray(acc.relationships)) 
+          ? acc.relationships : []
+          )
       }
     }
     return {
@@ -1078,9 +1084,13 @@ function buildDeepSimplifiedEnhancedNode(arr: SimplifiedEnhancedNode[], fn?: Fun
       relationships: [
         {
           labels: ['NEXT'],
-          partnerNode: buildDeepSimplifiedEnhancedNode(descendants, fn)
+          partnerNode: buildDeepSimplifiedEnhancedNode(descendants, customizeRelationship)
         }
-      ]
+        /* keep existing relationships, provided by user */
+      ].concat(
+        (acc.relationships && isArray(acc.relationships)) 
+        ? acc.relationships : []
+        )
     }
   }
 

@@ -143,6 +143,43 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
     expect(isEnhancedNode(rv)).toEqual(true)
     expect(rv.isWritten()).toEqual(true)
   })
+  test("add branches", async () => {
+    /// db setup
+    await engine.cleanDB();
+    const NAME = "Zero"
+    const value = 0
+    const LEMMA = `${NAME}_${value}`
+    const simpleNode0_ = mango.buildDeepSimplifiedEnhancedNode([
+      {
+        labels: ["Node0"],
+        properties: {
+          NAME,
+          value,
+        },
+        // want to add branches
+        relationships: [
+          {
+            labels: ["HAS_LEMMA"],
+            partnerNode: {
+              labels: ["Lemma"],
+              properties: { LEMMA }
+            }
+          }
+        ]
+      },
+    ])
+
+    /// !db setup
+    
+    const dse = mango.buildDeepSimplifiedEnhancedNode([simpleNode0_, ...arr])
+    // log(dse)
+    const rv = await mango.buildAndMergeEnhancedNode(dse)
+    // log(rv)
+    expect(isEnhancedNode(rv)).toEqual(true)
+    expect(rv.isWritten()).toEqual(true)
+    expect(rv.getAllRelationshipsLabels().includes('HAS_LEMMA')).toEqual(true)
+
+  })
 
 })
 
