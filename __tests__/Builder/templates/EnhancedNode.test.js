@@ -308,7 +308,7 @@ describe("methods", () => {
     test("simple Enode all pNodes are Nodes", () => {
       const enode = new EnhancedNode({
         labels: ["enode"],
-        properties: { A: 1 },
+        properties: { A: 1, _hash: 'A1' },
       });
       enode.addAllRelationships({
         inbound: [
@@ -318,7 +318,7 @@ describe("methods", () => {
             direction: "inbound",
             startNode: new Node({
               labels: ["Rel_in_startNode"],
-              properties: { B: 2 },
+              properties: { B: 2, _hash: 'B2' },
             }),
           }),
         ],
@@ -329,7 +329,7 @@ describe("methods", () => {
             direction: "outbound",
             endNode: new Node({
               labels: ["Rel_out_endNode"],
-              properties: { E: 5 },
+              properties: { E: 5, _hash: 'E5' },
             }),
           }),
         ],
@@ -380,6 +380,7 @@ describe("methods", () => {
                         labels: ["node2"],
                         properties: {
                           INPUT: 0,
+                          optionalProp: 2,
                           _label: "node2",
                           _date_created: [2020, 3, 13, 5, 1584110723519],
                           _hash: "node2_hash",
@@ -480,6 +481,7 @@ describe("methods", () => {
             labels: ["node2"],
             properties: {
               INPUT: 0,
+              optionalProp: 2,
               _label: "node2",
               _date_created: [2020, 3, 13, 5, 1584110723519],
               _hash: "node2_hash",
@@ -537,10 +539,11 @@ describe("methods", () => {
               },
               identity: null,
             },
-            /* Node */ {
+            /* Node2 */ {
               labels: ["node2"],
               properties: {
                 INPUT: 0,
+                optionalProp: 2,
                 _label: "node2",
                 _date_created: [2020, 3, 13, 5, 1584110723519],
                 _hash: "node2_hash",
@@ -626,10 +629,12 @@ describe("methods", () => {
               },
               identity: { low: 2, high: 0 },
             }),
+
             node2_hash: new Node({
               labels: ["node2"],
               properties: {
                 INPUT: 0,
+                optionalProp: 2,
                 _label: "node2",
                 _date_created: [2020, 3, 13, 5, 1584110723519],
                 _hash: "node2_hash",
@@ -637,6 +642,7 @@ describe("methods", () => {
               },
               identity: { low: 3, high: 0 },
             }),
+
             node3_hash: new Node({
               labels: ["node3"],
               properties: {
@@ -663,6 +669,7 @@ describe("methods", () => {
           const result = enode_.identifyParticipatingNodes(
             _pnode_hash_map_with_ids
           );
+          // log(result)
           const result_arr = enode_.getParticipatingNodes({ asHashMap: false });
 
           expect(result_arr.every((node) => node.isWritten())).toEqual(true);
@@ -694,6 +701,7 @@ describe("methods", () => {
                 labels: ["node2"],
                 properties: {
                   INPUT: 0,
+                  optionalProp: 2,
                   _label: "node2",
                   _date_created: [2020, 3, 13, 5, 1584110723519],
                   _hash: "node2_hash",

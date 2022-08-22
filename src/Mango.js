@@ -779,7 +779,8 @@ class Mango {
       { labels, properties },
       relationships
     );
-    // log(enode)
+    // log(enode.findParticipatingNodes({ properties: { NAME: "child0" } }))
+    // '0209508f85564dbc6cef5a343e0a120f8ce9c8de1e435a0303a8c36dd9f2736e'
 
     const result: Result[] = await this.engine.mergeEnhancedNodes([enode]);
 

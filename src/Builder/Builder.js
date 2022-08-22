@@ -82,6 +82,9 @@ import {
  *
  * Builder is using Engine (read only to gather info) as it is concerned with
  * building unique Nodes from their Candidates by checking for copies with Neo4j.
+ * @note 220822 does it though??? Atm it does not check with Neo4j for copies, it's not
+ * Builder's job to enforce Node uniqueness. Builder's job is to build Nodes/Enodes/
+ * Relationships.
  *
  * We want to ensure that Neo4j only contains validated, state-of-the-art knowledge.
  * We achieve this by creating the following 'first-class citizens' (fcs):

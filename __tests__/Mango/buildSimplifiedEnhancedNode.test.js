@@ -22,9 +22,9 @@ const dbProps = {
 describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
   const arr = [
     {
-      labels: ["Node1"],
+      labels: ["Node"],
       properties: {
-        NAME: "root",
+        NAME: "child0",
         value: 0,
       },
     },
@@ -43,10 +43,9 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
       },
     },
     {
-      labels: ["Node3"],
+      labels: ["Node"],
       properties: {
         NAME: "child3",
-        ID: 'child3_id',
         value: 3,
       },
     },
@@ -72,7 +71,7 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
     const prop = `(${arr[0].properties.NAME})-[LIKES]->(${arr[1].properties.NAME})`
 
     function fn(start, end) {
-      if (start.properties.NAME === 'root') {
+      if (start.properties.NAME === 'child0') {
         return {
           labels,
           properties: { prop }
@@ -100,7 +99,7 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
     const prop = `(${arr[0].properties.NAME})-[LIKES]->(${arr[1].properties.NAME})`
 
     function fn(start, end) {
-      if (start.labels[0] === 'Node1') {
+      if (start.properties.NAME === 'child0') {
         return {
           labels,
           properties: { prop }
@@ -209,8 +208,8 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
           {
             labels: ["DEPENDS_ON"],
             partnerNode: {
-              labels: ["Node3"],
-              properties: { NAME: 'child3', ID: 'child3_id' } // should preserve optional props!
+              labels: ["Node"],
+              properties: { NAME: 'child3' } // should preserve optional props!
             }
           },
         ]
@@ -228,14 +227,79 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
     expect(rv.isWritten()).toEqual(true)
     expect(rv.getAllRelationshipsLabels().includes('HAS_LEMMA')).toEqual(true)
 
-    /* it returns 2 Node3 as it's featured twice in returned Enode, but it 
-    must be same Node property-wise */
-    expect(rv.findParticipatingNodes({ labels: ["Node3"] })
-      .every(node => node.properties.value === 3
-      )).toEqual(true)
-    
-
+    /* check that { value: 3 } is preserved on child3 */
+    const child3 = rv.findParticipatingNodes({ properties: { NAME: "child3" } })
+    expect(child3).toHaveLength(2)
+    expect(child3.every(({ properties: { value }}) => value === 3)).toEqual(true)
   })
+  test.skip("should match existing Nodes and merge with them", async () => {
+    /// db setup
+    await engine.cleanDB();
+    /// !db setup
 
+    const NAME = "Zero"
+    const value = 0
+    const LEMMA = `${NAME}_${value}`
+    const simpleNode0_ = mango.buildDeepSimplifiedEnhancedNode([
+      {
+        labels: ["Node0"],
+        properties: {
+          NAME,
+          value,
+        },
+        // want to add branches
+        relationships: [
+          {
+            labels: ["HAS_LEMMA"],
+            partnerNode: {
+              labels: ["Lemma"],
+              properties: { LEMMA }
+            }
+          }, 
+          /* should link to child3 */
+          {
+            labels: ["DEPENDS_ON"],
+            partnerNode: {
+              labels: ["Node"],
+              properties: { NAME: 'child3' } 
+            }
+          },
+        ]
+      },
+    ])
+
+    const nodes = arr.map((node, i) => {
+      const relationships = []
+      /* if it's not the first 'root' node */
+      if (i) {
+        relationships.push({
+          labels: ["DEPENDS_ON"],
+          partnerNode: {
+            labels: ["Node"],
+            properties: { NAME: `child${i-1}` } // shall depend on previous child
+          }
+        })
+      }
+      return ({
+        ...node,
+        relationships
+      })
+    })
+    
+    const dse = mango.buildDeepSimplifiedEnhancedNode([simpleNode0_, ...nodes])
+    // log(dse)
+    const rv = await mango.buildAndMergeEnhancedNode(dse)
+    
+    // log(rv)
+    expect(isEnhancedNode(rv)).toEqual(true)
+    expect(rv.isWritten()).toEqual(true)
+    expect(rv.getAllRelationshipsLabels().includes('HAS_LEMMA')).toEqual(true)
+
+    /* check that { value: 0 } is preserved on child0 */
+    const child0 = rv.findParticipatingNodes({ properties: { NAME: "child0" } })
+    // log(child0)
+    // expect(child0).toHaveLength(1)
+    expect(child0.every(({ properties: { value }}) => value === 0)).toEqual(true)
+  })
 })
 

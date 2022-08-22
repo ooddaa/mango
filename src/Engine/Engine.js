@@ -858,12 +858,15 @@ class Engine {
 
     /* 1. unique node_hashMap */
     let node_hashMap: /* _hash: Node */ Object = _toNodeHashMap(enodes);
+    // log('0209508f85564dbc6cef5a343e0a120f8ce9c8de1e435a0303a8c36dd9f2736e' in node_hashMap)
+    // log(node_hashMap['0209508f85564dbc6cef5a343e0a120f8ce9c8de1e435a0303a8c36dd9f2736e'])
 
     /* 2. merge nodes */
     const mergeNodesResults: Result[] = await this.mergeNodes(
       values(node_hashMap),
       { extract: false, logExecutionTime, wrap }
     );
+
 
     {
       /* validations - check what's come back from DB */
@@ -874,7 +877,14 @@ class Engine {
     /* 2a. replace node_hashMap with merged nodes */
     node_hashMap = _toNodeHashMap(mergeNodesResults.map(getResultData));
 
-    /* 3. Preparing the returned results - update original enodes[] with merged nodes  */
+    // log(node_hashMap['0209508f85564dbc6cef5a343e0a120f8ce9c8de1e435a0303a8c36dd9f2736e'])
+
+    /** 3. Preparing the returned results - update original
+     * enodes[] with merged nodes.
+     * Make sure all returned Nodes (start/endNodes) are 
+     * same as in node_hashMap - ie we show client only
+     * really merged stuff.
+     */
     enodes.forEach((enode) => enode.identifyParticipatingNodes(node_hashMap));
 
     /* 4. unique rel_hashMap */
@@ -907,12 +917,20 @@ class Engine {
       }, []);
 
       /* 6. update original enodes[] with merged rels */
-
       rel_hashMap = _toHashMap(mergedRels);
+      // log(rel_hashMap)
+      // '3160a2e3d751935cd424546310d831349fca5af620a072a5b4130ae83fcb0d29'
       enodes.forEach((enode) => {
         enode.identifyParticipatingRelationships(rel_hashMap);
       });
+
+      
+
+      // log(enodes.length)
+      // log(enodes[0].getParticipatingRelationships().filter(rel => rel.labels[0] === 'DEPENDS_ON'))
+      // log(enodes[0].findParticipatingNodes({ properties: { NAME: "child0" } }))
     }
+    // log(enodes[0])
 
     /* Prepare results - add query & summary */
     const result: Result[] = _resultWrapper(enodes, mergeNodesResults);
@@ -974,6 +992,7 @@ class Engine {
 
         /* for flowJS purposes */
         if (val instanceof EnhancedNode) {
+          // log(val.properties._hash === '0209508f85564dbc6cef5a343e0a120f8ce9c8de1e435a0303a8c36dd9f2736e')
           acc = { ...acc, ...val.getParticipatingNodes({ asHashMap: true }) };
         } else {
           throw new Error(

@@ -2,11 +2,12 @@
 
 import { Node, isNode } from "./Node";
 import { Success, Failure } from "../../Result";
-import { log, isMissing, isPresent, not } from "../../utils";
+import { log, isMissing, isPresent, not, decomposeProps } from "../../utils";
 import { Relationship, isRelationship } from "./Relationship";
 
 import has from "lodash/has";
 import keys from "lodash/keys";
+import values from "lodash/values";
 import uniqBy from "lodash/uniqBy";
 import remove from "lodash/remove";
 import isArray from "lodash/isArray";
@@ -239,7 +240,7 @@ function getParticipatingNodes(
   ];
   const final = current.reduce((acc, node) => {
     if (isEnhancedNode(node)) {
-      acc.push(...node.getParticipatingNodes()); 
+      acc.push(...node.getParticipatingNodes());
       return acc;
     } else if (isNode(node)) {
       /**
@@ -273,8 +274,11 @@ function getParticipatingNodes(
       );
     }
   }, []);
-
-  return obj.asHashMap ? _toHashMap(final) : final;
+  // remove duplicates, prefer onces with more properties
+  const hashMap = _toHashMap(final)
+  // log(values(final).filter(node => node.properties.NAME === 'child0'))
+  // return obj.asHashMap ? _toHashMap(final) : final;
+  return obj.asHashMap ? hashMap : values(final);
 }
 EnhancedNode.prototype.getParticipatingNodes = getParticipatingNodes;
 
@@ -284,6 +288,9 @@ EnhancedNode.prototype.getParticipatingNodes = getParticipatingNodes;
  * @todo match whole labels' array as we do with whole properties object.
  * @param {Object} obj
  * @returns {Node[] | EnhancedNode[]}
+ * 
+ * @example
+ * enode.findParticipatingNodes({ properties: { NAME: "child3" } })) // [ Node { properties: { NAME: "child3",.. } }]
  */
 function findParticipatingNodes(
   obj: { labels: String[], properties: Object } = {}
@@ -344,12 +351,6 @@ function findParticipatingNodes(
     /* propsA must include all propsB's key:value pairs */
     let result = false;
     for (let prop in propsB) {
-      // result = propsA[prop] == propsB[prop] || false;
-      // if () {
-      //   result = true;
-      // } else {
-      //   result = false;
-      // }
       if (propsA[prop] == propsB[prop]) {
         result = true;
       } else {
@@ -364,20 +365,47 @@ EnhancedNode.prototype.findParticipatingNodes = findParticipatingNodes;
 /**
  * This gets called when we have received ids after merging to Neo4j.
  * Now we will walk this Enode and update participatingNodes with identities by _hash.
- * @param {Object} ids - must be { _hash: Node }
+ *  @note 220822 - returned Relationships might still show stale data -
+ * Neo4j's state might be misrepresented to the client, so here 
+ * we want to update the returned Enode's relationships with:
+ *  - Neo4j's identifications
+ *  - any optional Node properties (we assume REQUIRED properties weren't
+ *    changed as _hash'es would have changed) - dealing with 
+ *    Mango.simplifiedDeepEnhancedNode functionality here.
+ * 
+ * @param {{ string: Node }} node_hashMap - must be { _hash: Node }
  */
-function identifyParticipatingNodes(ids: Object): /* this */ EnhancedNode {
-  this.addProperty("_uuid", ids[this.getHash()].getProperty("_uuid"));
-  this.setIdentity(ids[this.getHash()].identity);
+function identifyParticipatingNodes(node_hashMap: Object): /* this */ EnhancedNode {
+  const node = node_hashMap[this.getHash()]
+  this.addProperty("_uuid", node.getProperty("_uuid"));
+  this.setIdentity(node.identity);
+
+  /* add optionals if any */
+  const { optionalProps } = decomposeProps(node.getProperties())
+  // log(optionalProps)
+  if (keys(optionalProps).length) {
+    this.properties = {
+      ...this.properties,
+      ...optionalProps,
+    }
+  }
 
   this.getAllRelationshipsAsArray().forEach((rel) => {
-    // do recursively on participatingNodes
+    /* do recursively on participatingNodes */
     const pn = rel.getPartnerNode();
     if (isEnhancedNode(pn)) {
-      pn.identifyParticipatingNodes(ids);
+      pn.identifyParticipatingNodes(node_hashMap);
     } else {
-      pn.addProperty("_uuid", ids[pn.getHash()].getProperty("_uuid"));
-      pn.setIdentity(ids[pn.getHash()].identity);
+      const pnode = node_hashMap[pn.getHash()]
+      pn.addProperty("_uuid", pnode.getProperty("_uuid"));
+      pn.setIdentity(pnode.identity);
+      const { optionalProps } = decomposeProps(pnode.getProperties())
+      if (keys(optionalProps).length) {
+        pn.properties = {
+          ...pn.properties,
+          ...optionalProps,
+        }
+      }
     }
   });
 
@@ -403,7 +431,8 @@ EnhancedNode.prototype.setIdentity = setIdentity;
  * Will use by Engine.mergeEnhancedNodes.
  * Short form == Relationship - startNode/endNode.
  * I need this to add identifications, don't  need to drag startNode/endNode around.
- * @param {*} obj
+ * @param {import("lodash").Object} obj
+ * @returns {Relationship[]|Object}
  */
 function getParticipatingRelationships(
   obj: {
@@ -453,6 +482,8 @@ EnhancedNode.prototype.getParticipatingRelationshipsByLabel = getParticipatingRe
 /**
  * This gets called by Engine.mergeEnhancedNodes when we have merged Relationships and
  * now want to update the original Enode's Relationships with Neo4j identifications.
+ * @todo should really be re-named updateParticipatingRelationships
+ * 
  * @param {object} ids - hash map with Neo4j identifications. Actually it looks as
  * 'relationship1_hash': Relationship ??
  * @param {EnhancedNode} enode
@@ -461,31 +492,34 @@ function identifyParticipatingRelationships(
   ids: Object,
   enode?: EnhancedNode
 ): /* this */ EnhancedNode {
-  const current = this.getAllRelationshipsAsArray().forEach((rel) => {
-    const ided = ids[rel.getHash()];
-    if (!ided) {
-      throw new Error(
-        `EnhancedNode.identifyParticipatingRelationships: was not provided an identified relationship (no ided) for _hash: ${rel.getHash()}.\nids:\n${JSON.stringify(
-          ids
-        )}`
-      );
-    }
-    /* copy Neo4j's identity */
-    rel.setIdentity(ided.identity);
+  const current =
+    this
+      .getAllRelationshipsAsArray()
+      .forEach((rel) => {
+        const ided = ids[rel.getHash()];
+        if (!ided) {
+          throw new Error(
+            `EnhancedNode.identifyParticipatingRelationships: was not provided an identified relationship (no ided) for _hash: ${rel.getHash()}.\nids:\n${JSON.stringify(
+              ids
+            )}`
+          );
+        }
+        /* copy Neo4j's identity */
+        rel.setIdentity(ided.identity);
 
-    if (has(ided, "properties") && has(ided.properties, "_uuid")) {
-      rel.addProperty(
-        "_uuid",
-        isRelationship(ided) // I'm not sure I will use Relationships here
-          ? ided.getProperty("_uuid")
-          : ided.properties._uuid
-      );
-    }
+        if (has(ided, "properties") && has(ided.properties, "_uuid")) {
+          rel.addProperty(
+            "_uuid",
+            isRelationship(ided) // I'm not sure I will use Relationships here
+              ? ided.getProperty("_uuid")
+              : ided.properties._uuid
+          );
+        }
 
-    /* do recursively on participating Enodes */
-    const pn = rel.getPartnerNode();
-    if (isEnhancedNode(pn)) pn.identifyParticipatingRelationships(ids);
-  });
+        /* do recursively on participating Enodes */
+        const pn = rel.getPartnerNode();
+        if (isEnhancedNode(pn)) pn.identifyParticipatingRelationships(ids);
+      });
   return this;
 }
 EnhancedNode.prototype.identifyParticipatingRelationships = identifyParticipatingRelationships;
@@ -760,18 +794,27 @@ function isNotEnhancedNode(val: any): boolean {
 }
 function _toHashMap(arr: (Node | EnhancedNode | Relationship)[]): Object {
   // log(arr)
-  return arr.reduce((acc, val) => {
-    // if (!isNode(val) || !isEnhancedNode(val) || !isRelationship(val)) {
-    //     throw new Error(`EnhancedNode._toHashMap: val must be Node | EnhancedNode | Relationship.'\n${JSON.stringify(val)}`)
-    // }
-    if (!val || !val.properties || !val.getHash()) {
+  return arr.reduce((acc, node) => {
+    // log(node)
+    if (!node || !node.properties || !node.getHash()) {
       throw new Error(
-        `EnhancedNode._toHashMap: cannot locate _hash (!val || !val.properties || !val.properties._hash).\nval: ${JSON.stringify(
-          val
+        `EnhancedNode._toHashMap: cannot locate _hash (!node || !node.properties || !node.properties._hash).\nnode: ${JSON.stringify(
+          node
         )}`
       );
     }
-    acc[val.getHash()] = val;
+    /**
+     * @bugfix 220822 - same as in getParticipatingNodes - check if node with same hash already exists
+     * if so, check who has more properties - there might be optional ones
+     * that we do not want to skip
+     */
+    if (node.properties._hash in acc) {
+      const existingKeys = keys(acc[node.getHash()].getProperties())
+      const newKeys = keys(node.getProperties())
+      if (existingKeys.length > newKeys.length) return acc
+    }
+
+    acc[node.getHash()] = node;
     return acc;
   }, {});
 }
