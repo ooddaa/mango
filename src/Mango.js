@@ -779,6 +779,7 @@ class Mango {
       { labels, properties },
       relationships
     );
+    // log(enode)
 
     const result: Result[] = await this.engine.mergeEnhancedNodes([enode]);
 

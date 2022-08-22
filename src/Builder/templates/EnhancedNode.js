@@ -6,6 +6,7 @@ import { log, isMissing, isPresent, not } from "../../utils";
 import { Relationship, isRelationship } from "./Relationship";
 
 import has from "lodash/has";
+import keys from "lodash/keys";
 import uniqBy from "lodash/uniqBy";
 import remove from "lodash/remove";
 import isArray from "lodash/isArray";
@@ -120,8 +121,8 @@ function getAllRelationships(
   obj: {
     byLabel: string | typeof undefined,
   } = {
-    byLabel: undefined,
-  }
+      byLabel: undefined,
+    }
 ): Object | Relationship[] {
   if (obj.byLabel && obj.byLabel.length) {
     return this.getAllRelationshipsAsArray().filter((rel) =>
@@ -236,19 +237,36 @@ function getParticipatingNodes(
     ...this.getInboundRelationships().map((rel) => rel.getStartNode()),
     ...this.getOutboundRelationships().map((rel) => rel.getEndNode()),
   ];
-  const final = current.reduce((acc, val) => {
-    if (isEnhancedNode(val)) {
-      // log(`Enode: ${val.getLabels()[0]}`)
-      acc.push(...val.getParticipatingNodes()); // aaa was val.getParticipatingNodes1() !!
+  const final = current.reduce((acc, node) => {
+    if (isEnhancedNode(node)) {
+      acc.push(...node.getParticipatingNodes()); 
       return acc;
-    } else if (isNode(val)) {
-      // log(`Node: ${val.getLabels()[0]}`)
-      acc.push(val);
+    } else if (isNode(node)) {
+      /**
+       * @bugfix 220822 - check if node with same hash already exists
+       * if so, check who has more properties - there might be optional ones
+       * that we do not want to skip
+       */
+
+      const matched = acc.filter(({ properties: { _hash } }) => _hash === node.properties._hash)
+
+      if (matched.length) {
+        /**
+         * @todo x.length > 1 ??, sort and pick one with most properties
+         */
+
+        const existingKeys = keys(matched[0].properties)
+        const newKeys = keys(node.properties)
+        /* already exists, no new props are offered, skip */
+        if (existingKeys.length > newKeys.length) return acc
+      }
+
+      acc.push(node);
       return acc;
     } else {
       throw new Error(
-        `EnhancedNode.getParticipatingNodes: something is wrong!.\nval: ${JSON.stringify(
-          val,
+        `EnhancedNode.getParticipatingNodes: something is wrong!.\nnode: ${JSON.stringify(
+          node,
           null,
           4
         )}`
@@ -392,9 +410,9 @@ function getParticipatingRelationships(
     asHashMap: boolean,
     short: boolean,
   } = {
-    asHashMap: false,
-    short: false,
-  },
+      asHashMap: false,
+      short: false,
+    },
   node: Node | EnhancedNode
 ): Relationship[] | Object {
   /**
@@ -429,7 +447,7 @@ EnhancedNode.prototype.getParticipatingRelationships = getParticipatingRelations
  * @todo implement!
  * @param {string} label
  */
-function getParticipatingRelationshipsByLabel(label: string): Relationship[] {}
+function getParticipatingRelationshipsByLabel(label: string): Relationship[] { }
 EnhancedNode.prototype.getParticipatingRelationshipsByLabel = getParticipatingRelationshipsByLabel;
 
 /**
@@ -716,7 +734,7 @@ function isCurrent(): boolean {
 }
 EnhancedNode.prototype.isCurrent = isCurrent;
 
-function markAsUpdated(): void {}
+function markAsUpdated(): void { }
 EnhancedNode.prototype.markAsUpdated = markAsUpdated;
 
 function hasBeenUpdated(): boolean {

@@ -43,9 +43,10 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
       },
     },
     {
-      labels: ["Node"],
+      labels: ["Node3"],
       properties: {
         NAME: "child3",
+        ID: 'child3_id',
         value: 3,
       },
     },
@@ -178,6 +179,61 @@ describe("build and merge deep EnhancedNode from SimplifiedNode[]", () => {
     expect(isEnhancedNode(rv)).toEqual(true)
     expect(rv.isWritten()).toEqual(true)
     expect(rv.getAllRelationshipsLabels().includes('HAS_LEMMA')).toEqual(true)
+
+  })
+  test("should match existing Node and merge with it", async () => {
+    /// db setup
+    await engine.cleanDB();
+    /// !db setup
+
+    const NAME = "Zero"
+    const value = 0
+    const LEMMA = `${NAME}_${value}`
+    const simpleNode0_ = mango.buildDeepSimplifiedEnhancedNode([
+      {
+        labels: ["Node0"],
+        properties: {
+          NAME,
+          value,
+        },
+        // want to add branches
+        relationships: [
+          {
+            labels: ["HAS_LEMMA"],
+            partnerNode: {
+              labels: ["Lemma"],
+              properties: { LEMMA }
+            }
+          }, 
+          /* should link to child3 */
+          {
+            labels: ["DEPENDS_ON"],
+            partnerNode: {
+              labels: ["Node3"],
+              properties: { NAME: 'child3', ID: 'child3_id' } // should preserve optional props!
+            }
+          },
+        ]
+      },
+    ])
+
+    
+    
+    const dse = mango.buildDeepSimplifiedEnhancedNode([simpleNode0_, ...arr])
+    // log(dse)
+    const rv = await mango.buildAndMergeEnhancedNode(dse)
+    
+    // log(rv)
+    expect(isEnhancedNode(rv)).toEqual(true)
+    expect(rv.isWritten()).toEqual(true)
+    expect(rv.getAllRelationshipsLabels().includes('HAS_LEMMA')).toEqual(true)
+
+    /* it returns 2 Node3 as it's featured twice in returned Enode, but it 
+    must be same Node property-wise */
+    expect(rv.findParticipatingNodes({ labels: ["Node3"] })
+      .every(node => node.properties.value === 3
+      )).toEqual(true)
+    
 
   })
 

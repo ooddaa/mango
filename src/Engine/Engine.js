@@ -858,12 +858,12 @@ class Engine {
 
     /* 1. unique node_hashMap */
     let node_hashMap: /* _hash: Node */ Object = _toNodeHashMap(enodes);
+
     /* 2. merge nodes */
     const mergeNodesResults: Result[] = await this.mergeNodes(
       values(node_hashMap),
       { extract: false, logExecutionTime, wrap }
     );
-    // log(mergeNodesResults)
 
     {
       /* validations - check what's come back from DB */
@@ -953,8 +953,8 @@ class Engine {
      */
     function _toHashMap(arr: any[]): Object {
       // log(arr);
-      return arr.reduce((acc, val) => {
-        acc[val.properties._hash] = val;
+      return arr.reduce((acc, node) => {
+        acc[node.properties._hash] = node;
         return acc;
       }, {});
     }
