@@ -15,6 +15,7 @@ const engine = new Engine({ neo4jUsername, neo4jPassword, ip, port, database });
 engine.startDriver();
 
 /* Check connection to Neo4j */
-engine.verifyConnectivity({ database }).then(log);
+// engine.verifyConnectivity({ database }).then(log);
+engine.verifyConnectivity({ database }).then(({address, version}) => log(`{ address: ${address}, database: ${database}, version: ${version}}`));
 
 module.exports = { engine };

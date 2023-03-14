@@ -179,7 +179,20 @@ Node.prototype.getHash = getHash
  * Hash formula is
  * Labels[0] + all required properties.
  * IdArrays return only first element, NICKNAME.
- * @todo how do we _hash 
+ * 
+ * @todo add { makeUniqueHash: true }
+ * 
+ * Engine.mergeNodes's query:
+ * `
+      UNWIND $nodes as node
+      MERGE (x:${labels} {_hash: node._hash})
+      ON MATCH SET x._labels = node._labels
+      ON CREATE SET x = node
+      WITH x
+      CALL apoc.create.uuids(1) YIELD uuid
+      FOREACH (changeMe IN CASE WHEN x._uuid IS NULL THEN [1] ELSE [] END | SET x._uuid = uuid)
+      RETURN x 
+      `
  */
 function setHash(): void {
   const props = this.getRequiredProperties();

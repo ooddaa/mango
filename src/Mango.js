@@ -264,7 +264,7 @@ class Mango {
       fuzzyProps: string[],
       returnResult: boolean,
     } = {}
-  ) {
+  ): Promise<Result|Node[]> {
 
     /**
      * @todo think of a better mechanism to prefer fuzzy > fuzzyProps

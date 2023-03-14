@@ -227,15 +227,10 @@ class Engine {
       ];
 
       if (this.driver) {
-        // if (not(isFunction(this.driver))) {
         if (not(isFunction(this.driver))) {
           /* make it obvious - user wanted to supply driver but it failed. */
           throw new Error(
-            `Engine.startDriver: driver not a Function.\nthis.driver: ${JSON.stringify(
-              this.driver,
-              null,
-              4
-            )}`
+            `Engine.startDriver: driver not a Function.\nthis.driver: ${stringify(this.driver)}`
           );
         }
         /* flowJs, calm down, we know that this.driver IS a Function here */
@@ -251,9 +246,7 @@ class Engine {
       return driver;
     } catch (error) {
       console.error(error);
-      throw new Error(
-        `Engine.startDriver: could not instantiate driver.\nerror: ${error}`
-      );
+      throw new Error(`Engine.startDriver: could not instantiate driver.\nerror: ${error}`);
     }
   }
 

@@ -282,8 +282,14 @@ class Builder {
       /* make final Node */
       const finalNode = new Node({ ...newNode });
 
+      /**
+       * @TODO 220830 I may want to force creating a unique Node, no matter labels+REQPROPS
+       * finalNode.setHash({ makeUniqueHash: true });
+       * Just to add flexibility to system's design.
+       */
       /* set _hash */
       finalNode.setHash();
+
 
       return new Success({
         data: finalNode,
